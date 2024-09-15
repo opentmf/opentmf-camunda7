@@ -1,0 +1,65 @@
+---
+spring:
+  autoconfigure:
+    exclude:
+    - org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
+
+  application:
+    name: PiaCamunda7
+  config:
+    import:
+      - config-camunda.yml
+      - config-security.yml
+  servlet:
+    multipart:
+      enabled: false
+  datasource:
+    url: jdbc:postgresql://postgresql:5432/db?useUnicode=yes&characterEncoding=UTF-8&currentSchema=camunda7
+    username: camunda7
+    hikari:
+      schema: camunda7
+      auto-commit: false
+      connection-timeout: 30000
+      idle-timeout: 1800000
+      max-lifetime: 2400000
+      minimum-idle: 2
+      maximum-pool-size: 10
+      pool-name: camunda7-pool
+
+server:
+  port: 8080
+  servlet:
+    context-path: /camunda/v7
+    jsp:
+      registered: false
+  shutdown: graceful
+  ssl:
+    enabled: false
+  tomcat:
+    max-http-form-post-size: 10MB
+  max-http-request-header-size: 8KB
+
+management:
+  endpoint:
+    env:
+      enabled: true
+      show-values: when_authorized
+    metrics:
+      enabled: true
+    loggers:
+      enabled: true
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - metrics
+          - loggers
+          - env
+  server:
+    base-path: /actuator
+    port: 16000

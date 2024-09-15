@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<include resource="org/springframework/boot/logging/logback/defaults.xml" />
+
+	<if condition='isDefined("KUBERNETES_SERVICE_HOST")'>
+		<then>
+			<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+				<encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+			</appender>
+		</then>
+		<else>
+			<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+				<encoder>
+					<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} context:[%X] - %msg%n</pattern>
+				</encoder>
+			</appender>
+		</else>
+	</if>
+
+	<logger name="org.camunda" level="DEBUG" />
+	<logger name="cockpit" level="INFO" />
+	<logger name="admin" level="INFO" />
+	<logger name="com.pia" level="TRACE" />
+
+	<!-- Set to INFO to disable request / response logging of Camunda -->
+	<logger name="org.glassfish.jersey.logging.LoggingFeature" level="DEBUG" />
+
+	<root level="TRACE">
+		<appender-ref ref="CONSOLE" />
+	</root>
+
+</configuration>

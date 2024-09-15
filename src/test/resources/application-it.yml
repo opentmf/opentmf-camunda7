@@ -1,0 +1,24 @@
+pia-security:
+  jwk-set-uri: classpath:jwk-set.json
+
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:16.1-alpine:///solhub
+    hikari:
+      schema: public
+
+camunda.bpm.authorization:
+  enabled: false
+
+management:
+  endpoints:
+    enabled-by-default: false
+  endpoint:
+    loggers:
+      enabled: false
+    health:
+      enabled: false
+    metrics:
+      enabled: false
+    env:
+      enabled: false

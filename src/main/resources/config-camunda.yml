@@ -1,0 +1,35 @@
+---
+camunda.bpm:
+  authorization:
+    enabled: true
+  database:
+    type: postgres
+    schema-update: true
+    schema-name: ${spring.datasource.hikari.schema}
+    table-prefix: ${spring.datasource.hikari.schema}.
+  filter:
+    create: All tasks
+  generic-properties:
+    properties:
+      telemetry-reporter-activate: false
+      historyTimeToLive: P36500D
+  webapp:
+    header-security:
+      content-security-policy-value: "base-uri 'self';
+                                        script-src $NONCE 'strict-dynamic' 'unsafe-eval' https: 'self' 'unsafe-inline';
+                                        style-src 'unsafe-inline' 'self';
+                                        connect-src ${keycloak.url} 'self';
+                                        default-src 'self';
+                                        img-src 'self' data:;
+                                        block-all-mixed-content;form-action 'self';
+                                        frame-ancestors 'none';object-src 'none';
+                                        sandbox allow-forms allow-scripts allow-same-origin allow-popups allow-downloads"
+
+plugin.identity.keycloak:
+  keycloak-issuer-url: http://keycloak.iam-dev.svc.cluster.local/realms/devtest
+  keycloak-admin-url: http://keycloak.iam-dev.svc.cluster.local/admin/realms/devtest
+  client-id: xxx
+  client-secret: xxx
+  use-username-as-camunda-user-id: true
+  use-group-path-as-camunda-group-id: true
+  administrator-group-name: camunda-admin
