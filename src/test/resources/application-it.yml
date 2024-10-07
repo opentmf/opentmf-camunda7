@@ -1,5 +1,6 @@
-pia-security:
-  jwk-set-uri: classpath:jwk-set.json
+pia:
+  security:
+    jwk-set-uri: classpath:jwk-set.json
 
 spring:
   datasource:

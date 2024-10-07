@@ -23,5 +23,7 @@ mvn -P docker clean package
 ```
 
 ## Version History
-### 7.21.0.0
-- Initial Version
+- 21.0.0
+  - Initial Version
+- 22.0.0
+  - Updates to Camunda 7.22.0
