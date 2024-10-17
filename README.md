@@ -29,3 +29,5 @@ mvn -P docker clean package
   - Updates to Camunda 7.22.0
 - 22.0.1
   - Updates to camunda-incident-logger 1.0.1
+  - Fix: Removed telemetry-reporter-activate property.
+  - Decreased default value of historyTimeToLive to 92 days

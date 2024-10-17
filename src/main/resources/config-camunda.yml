@@ -11,8 +11,7 @@ camunda.bpm:
     create: All tasks
   generic-properties:
     properties:
-      telemetry-reporter-activate: false
-      historyTimeToLive: P36500D
+      historyTimeToLive: P92D
   webapp:
     header-security:
       content-security-policy-value: "base-uri 'self';
