@@ -27,3 +27,5 @@ mvn -P docker clean package
   - Initial Version
 - 22.0.0
   - Updates to Camunda 7.22.0
+- 22.0.1
+  - Updates to camunda-incident-logger 1.0.1
