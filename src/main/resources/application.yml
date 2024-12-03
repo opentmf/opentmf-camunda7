@@ -42,13 +42,14 @@ server:
 management:
   endpoint:
     env:
-      enabled: true
       show-values: when_authorized
+      access: read_only
     metrics:
-      enabled: true
+      access: read_only
     loggers:
-      enabled: true
+      access: unrestricted
     health:
+      access: unrestricted
       probes:
         enabled: true
       show-details: always
@@ -61,5 +62,5 @@ management:
           - loggers
           - env
   server:
-    base-path: /actuator
+    base-path: /
     port: 16000

@@ -33,3 +33,8 @@ mvn -P docker clean package
   - Decreased default value of historyTimeToLive to 92 days
 - 22.0.2
   - Updated pia-security version from 1.0.2 to 1.0.3
+- 22.0.3
+  - Updated pia-security version from 1.0.3 to 1.0.5
+  - Updated spring-boot version from 3.3.4 to 3.4.0
+  - fix: default management server base path is now /
+  - changed the project tagging format to just version
