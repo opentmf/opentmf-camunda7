@@ -8,7 +8,7 @@
   </parent>
   <groupId>com.pia.commons</groupId>
   <artifactId>pia-camunda-7</artifactId>
-  <version>22.0.4-SNAPSHOT</version>
+  <version>22.0.4</version>
   <properties>
     <java.version>17</java.version>
 
@@ -318,7 +318,7 @@
   <scm>
     <connection>scm:git:git@github.com:pia-commons/pia-camunda-7.git</connection>
     <developerConnection>scm:git:git@github.com:pia-commons/pia-camunda-7.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>v7.22.0.4</tag>
   </scm>
 
   <profiles>
