@@ -13,13 +13,5 @@ camunda.bpm.authorization:
 
 management:
   endpoints:
-    enabled-by-default: false
-  endpoint:
-    loggers:
-      enabled: false
-    health:
-      enabled: false
-    metrics:
-      enabled: false
-    env:
-      enabled: false
+    access:
+      default: none

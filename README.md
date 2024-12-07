@@ -38,3 +38,6 @@ mvn -P docker clean package
   - Updated spring-boot version from 3.3.4 to 3.4.0
   - fix: default management server base path is now /
   - changed the project tagging format to just version
+- 22.0.4
+  - Updated camunda-incident-logger to 1.0.2
+  - Prepended "v7." to the project tagging format

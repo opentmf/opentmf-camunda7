@@ -17,7 +17,7 @@
     <camunda-platform-7-keycloak.version>7.22.0</camunda-platform-7-keycloak.version>
     <camunda-spin.version>7.22.0</camunda-spin.version>
     <pia-security.version>1.0.5</pia-security.version>
-    <camunda-incident-logger.version>1.0.1</camunda-incident-logger.version>
+    <camunda-incident-logger.version>1.0.2</camunda-incident-logger.version>
     <graalvm.version>23.0.5</graalvm.version>
     <logstash-logback-encoder.version>8.0</logstash-logback-encoder.version>
 
@@ -213,7 +213,7 @@
         <artifactId>maven-release-plugin</artifactId>
         <version>${maven-release-plugin.version}</version>
         <configuration>
-          <tagNameFormat>@{project.version}</tagNameFormat>
+          <tagNameFormat>v7.@{project.version}</tagNameFormat>
         </configuration>
       </plugin>
       <plugin>
