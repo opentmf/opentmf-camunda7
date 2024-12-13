@@ -41,3 +41,6 @@ mvn -P docker clean package
 - 22.0.4
   - Updated camunda-incident-logger to 1.0.2
   - Prepended "v7." to the project tagging format
+- 22.0.5
+  - Updated pia-security to 1.0.6
+  - Changed project tagging format and prepended just "v"
