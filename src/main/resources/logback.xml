@@ -9,7 +9,7 @@
 			</appender>
 		</then>
 		<else>
-			<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+			<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 				<encoder>
 					<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} context:[%X] - %msg%n</pattern>
 				</encoder>
@@ -17,15 +17,22 @@
 		</else>
 	</if>
 
-	<logger name="org.camunda" level="DEBUG" />
-	<logger name="cockpit" level="INFO" />
-	<logger name="admin" level="INFO" />
+	<!-- Spring Framework -->
+	<logger name="org.springframework" level="INFO" />
+
+	<!-- PiA -->
 	<logger name="com.pia" level="TRACE" />
 
-	<!-- Set to INFO to disable request / response logging of Camunda -->
-	<logger name="org.glassfish.jersey.logging.LoggingFeature" level="DEBUG" />
+	<!-- Camunda -->
+	<logger name="org.camunda" level="INFO" />
+	<logger name="cockpit" level="INFO" />
+	<logger name="admin" level="INFO" />
 
-	<root level="TRACE">
+	<!-- INFO: disable request / response logging of Camunda Server
+	     DEBUG: Enable (only for testing and/or troubleshooting purposes) -->
+	<logger name="org.glassfish.jersey.logging.LoggingFeature" level="INFO" />
+
+	<root level="INFO">
 		<appender-ref ref="CONSOLE" />
 	</root>
 

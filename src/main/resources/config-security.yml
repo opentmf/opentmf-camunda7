@@ -31,9 +31,25 @@ pia:
           - ENTERPRISE-GUI/ADMIN_ALL
           - ENTERPRISE-API/ADMIN_ALL
 
+      # Actuator Endpoints That Require Authorization
+      - method: GET
+        path: /actuator/env
+        roles:
+          - write
+          - ENTERPRISE-GUI/ADMIN_ALL
+          - ENTERPRISE-API/ADMIN_ALL
+      - method: GET
+        path: /actuator/env/**
+        roles:
+          - write
+          - ENTERPRISE-GUI/ADMIN_ALL
+          - ENTERPRISE-API/ADMIN_ALL
+
     whitelist:
       - /error
       - /camunda/**
       - /engine-rest/external-task/**
       - /actuator
-      - /actuator/**
+      - /actuator/health/**
+      - /actuator/loggers/**
+      - /actuator/metrics/**

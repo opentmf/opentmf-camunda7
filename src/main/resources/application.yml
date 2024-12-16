@@ -40,20 +40,9 @@ server:
   max-http-request-header-size: 8KB
 
 management:
-  endpoint:
-    env:
-      show-values: when_authorized
-      access: read_only
-    metrics:
-      access: read_only
-    loggers:
-      access: unrestricted
-    health:
-      access: unrestricted
-      probes:
-        enabled: true
-      show-details: always
   endpoints:
+    access:
+      default: read_only
     web:
       exposure:
         include:
@@ -61,6 +50,19 @@ management:
           - metrics
           - loggers
           - env
+  endpoint:
+    env:
+      show-values: when_authorized
+      roles:
+        - write
+        - ENTERPRISE-GUI/ADMIN_ALL
+        - ENTERPRISE-API/ADMIN_ALL
+    loggers:
+      access: unrestricted
+    health:
+      probes:
+        enabled: true
+      show-details: always
   server:
     base-path: /
     port: 16000

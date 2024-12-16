@@ -44,3 +44,9 @@ mvn -P docker clean package
 - 22.0.5
   - Updated pia-security to 1.0.6
   - Changed project tagging format and prepended just "v"
+- 22.0.6
+    - Updated pia-security to 1.0.7
+    - Minimized logging in default configuration
+    - Refined actuator endpoints related configuration
+    - Started requiring security on GET /actuator/env endpoints.
+    - Specified additional roles to unsanitize GET /actuator/env data
