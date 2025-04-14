@@ -5,7 +5,7 @@ spring:
     - org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
 
   application:
-    name: PiaCamunda7
+    name: OpenTmfCamunda7
   config:
     import:
       - config-camunda.yml

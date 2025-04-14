@@ -1,4 +1,4 @@
-package com.pia.camunda.config;
+package org.opentmf.camunda.config;
 
 import jakarta.ws.rs.ApplicationPath;
 import java.util.logging.Level;

@@ -1,5 +1,5 @@
 # the lightweight alpine does not support arm64
-# hence another lightweight distro jammy
+# hence another lightweight distro jammy for broader coverage
 FROM eclipse-temurin:17-jre-jammy AS builder
 WORKDIR /application
 ARG JAR_FILE=target/*.jar

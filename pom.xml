@@ -4,38 +4,112 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.4.0</version>
+    <version>3.4.4</version>
   </parent>
-  <groupId>com.pia.commons</groupId>
-  <artifactId>pia-camunda-7</artifactId>
-  <version>22.0.7-SNAPSHOT</version>
+  <groupId>org.opentmf.camunda</groupId>
+  <artifactId>opentmf-camunda7</artifactId>
+  <version>23.0.0-SNAPSHOT</version>
+
+  <description>
+    An OpenTMF produced Spring Boot microservice that embeds the latest Camunda7 community edition
+    with the public Spin, and OpenID auth for Keycloak plugins, as well as OpenTMF's
+    "Camunda7 Incident Logger", and "openid-rbac-security" libraries.
+  </description>
+
+  <url>https://github.com/opentmf/opentmf-camunda7</url>
+
+  <organization>
+    <name>PiA Group</name>
+    <url>https://www.pia-group.net/</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A permissive open-source license</comments>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>gokhanus</id>
+      <name>Gokhan Demir</name>
+      <email>gokhan@opentmf.org</email>
+    </developer>
+    <developer>
+      <id>yusuf-bozkurt</id>
+      <name>Yusuf Bozkurt</name>
+      <email>yusuf.bozkurt@pia-team.com</email>
+    </developer>
+    <developer>
+      <id>cezmi-aslan</id>
+      <name>Cezmi Aslan</name>
+      <email>cezmi.aslan@pia-team.com</email>
+    </developer>
+  </developers>
+
   <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>17</java.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+
+    <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
 
     <!-- Application dependencies -->
-    <camunda.version>7.22.0</camunda.version>
+    <camunda.version>7.23.0</camunda.version>
     <camunda-platform-7-keycloak.version>7.22.0</camunda-platform-7-keycloak.version>
-    <camunda-spin.version>7.22.0</camunda-spin.version>
-    <pia-security.version>1.0.7</pia-security.version>
-    <camunda-incident-logger.version>1.0.2</camunda-incident-logger.version>
-    <graalvm.version>23.0.5</graalvm.version>
-    <logstash-logback-encoder.version>8.0</logstash-logback-encoder.version>
+    <camunda-spin.version>7.23.0</camunda-spin.version>
+    <openid-rbac-security.version>1.1.0</openid-rbac-security.version>
+    <camunda-incident-logger.version>1.0.3</camunda-incident-logger.version>
+    <graalvm.version>24.2.0</graalvm.version>
 
-    <archunit.version>1.3.0</archunit.version>
+    <archunit.version>1.4.0</archunit.version>
     <testcontainers.version>1.19.8</testcontainers.version>
 
     <!-- Maven plugins -->
-<!--
--->
     <exec-maven-plugin.version>3.5.0</exec-maven-plugin.version>
-    <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
-    <sonar-plugin.version>5.0.0.4389</sonar-plugin.version>
-    <nexus-staging-plugin.version>1.7.0</nexus-staging-plugin.version>
+    <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+    <sonar-plugin.version>5.1.0.4751</sonar-plugin.version>
+    <maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
+    <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
 
     <!-- Sonar properties -->
-    <sonar.coverage.exclusions>**/PiaCamunda7Application.java</sonar.coverage.exclusions>
+    <sonar.coverage.exclusions>**/OpenTmfCamunda7Application.java</sonar.coverage.exclusions>
     <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
+
+    <!-- Temporarily managed dependencies to get rid of conflicts -->
+    <java-uuid-generator.version>5.1.0</java-uuid-generator.version>
+    <checker-qual.version>3.48.3</checker-qual.version>
+    <error_prone_annotations.version>2.27.0</error_prone_annotations.version>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.camunda.commons</groupId>
+        <artifactId>camunda-commons-logging</artifactId>
+        <version>${camunda.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.uuid</groupId>
+        <artifactId>java-uuid-generator</artifactId>
+        <version>${java-uuid-generator.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.checkerframework</groupId>
+        <artifactId>checker-qual</artifactId>
+        <version>${checker-qual.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.errorprone</groupId>
+        <artifactId>error_prone_annotations</artifactId>
+        <version>${error_prone_annotations.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
 
@@ -66,8 +140,8 @@
       <version>${camunda-platform-7-keycloak.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.pia.commons</groupId>
-      <artifactId>camunda-incident-logger</artifactId>
+      <groupId>org.opentmf.camunda</groupId>
+      <artifactId>camunda7-incident-logger</artifactId>
       <version>${camunda-incident-logger.version}</version>
       <scope>runtime</scope>
     </dependency>
@@ -80,14 +154,15 @@
       <groupId>org.graalvm.js</groupId>
       <artifactId>js</artifactId>
       <version>${graalvm.version}</version>
+      <type>pom</type>
       <scope>runtime</scope>
     </dependency>
 
-    <!-- Pia OpenID Security -->
+    <!-- OpenTMF OpenID Security -->
     <dependency>
-      <groupId>com.pia.commons</groupId>
-      <artifactId>pia-security</artifactId>
-      <version>${pia-security.version}</version>
+      <groupId>org.opentmf.security</groupId>
+      <artifactId>openid-rbac-security</artifactId>
+      <version>${openid-rbac-security.version}</version>
     </dependency>
 
     <!-- Database dependencies -->
@@ -108,12 +183,6 @@
     </dependency>
 
     <!-- Logging dependencies -->
-    <dependency>
-      <groupId>net.logstash.logback</groupId>
-      <artifactId>logstash-logback-encoder</artifactId>
-      <version>${logstash-logback-encoder.version}</version>
-      <scope>runtime</scope>
-    </dependency>
     <dependency>
       <groupId>org.codehaus.janino</groupId>
       <artifactId>janino</artifactId>
@@ -147,6 +216,15 @@
   </dependencies>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.sonarsource.scanner.maven</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+          <version>${sonar-plugin.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -168,13 +246,10 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-      </plugin>
-      <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
+          <skip>${spring-boot.repackage.skip}</skip>
           <layers>
             <enabled>true</enabled>
             <includeLayerTools>true</includeLayerTools>
@@ -183,11 +258,37 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -207,21 +308,36 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>${maven-gpg-plugin.version}</version>
         <executions>
           <execution>
-            <id>attach-sources</id>
-            <phase>deploy</phase>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
             <goals>
-              <goal>jar-no-fork</goal>
+              <goal>sign</goal>
             </goals>
           </execution>
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.sonarsource.scanner.maven</groupId>
-        <artifactId>sonar-maven-plugin</artifactId>
-        <version>${sonar-plugin.version}</version>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <useReleaseProfile>false</useReleaseProfile>
+          <goals>deploy</goals>
+          <tagNameFormat>v@{project.version}</tagNameFormat>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>${central-publishing-maven-plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <publishingServerId>publish-to-central</publishingServerId>
+          <autoPublish>true</autoPublish>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
@@ -278,108 +394,17 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <configuration>
-          <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <version>${maven-deploy-plugin.version}</version>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>${nexus-staging-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>default-deploy</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>deploy</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <serverId>pia-commons-release</serverId>
-          <nexusUrl>https://nexus.dnext-pia.com/</nexusUrl>
-          <skipStaging>true</skipStaging>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>${maven-release-plugin.version}</version>
-        <configuration>
-          <tagNameFormat>v@{project.version}</tagNameFormat>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
 
-  <repositories>
-    <repository>
-      <id>pia-commons-release</id>
-      <layout>default</layout>
-      <name>Maven RELEASE Repository for pia-commons</name>
-      <releases>
-        <checksumPolicy>warn</checksumPolicy>
-        <enabled>true</enabled>
-        <updatePolicy>always</updatePolicy>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <url>https://nexus.dnext-pia.com/repository/pia-commons-release/</url>
-    </repository>
-    <repository>
-      <id>pia-commons-snapshot</id>
-      <name>Maven SNAPSHOT Repository for pia-commons</name>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <checksumPolicy>warn</checksumPolicy>
-        <enabled>true</enabled>
-        <updatePolicy>interval:5</updatePolicy>
-      </snapshots>
-      <url>https://nexus.dnext-pia.com/repository/pia-commons-snapshot/</url>
-    </repository>
-  </repositories>
-
-  <distributionManagement>
-    <repository>
-      <id>pia-commons-release</id>
-      <url>https://nexus.dnext-pia.com/repository/pia-commons-release/</url>
-    </repository>
-    <snapshotRepository>
-      <id>pia-commons-snapshot</id>
-      <url>https://nexus.dnext-pia.com/repository/pia-commons-snapshot/</url>
-    </snapshotRepository>
-  </distributionManagement>
-
-  <scm>
-    <connection>scm:git:git@github.com:pia-commons/pia-camunda-7.git</connection>
-    <developerConnection>scm:git:git@github.com:pia-commons/pia-camunda-7.git</developerConnection>
-    <tag>HEAD</tag>
-  </scm>
-
+  <!-- Profile to create a local Docker image -->
   <profiles>
     <profile>
       <id>docker</id>
+      <properties>
+        <!-- In the docker profile, enable repackaging -->
+        <spring-boot.repackage.skip>false</spring-boot.repackage.skip>
+      </properties>
       <build>
         <plugins>
           <plugin>
@@ -430,5 +455,12 @@
       </build>
     </profile>
   </profiles>
+
+  <scm>
+    <url>https://github.com/opentmf/opentmf-camunda7</url>
+    <connection>scm:git:git@github.com:opentmf/opentmf-camunda7.git</connection>
+    <developerConnection>scm:git:git@github.com:opentmf/opentmf-camunda7.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
 
 </project>

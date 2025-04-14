@@ -1,4 +1,4 @@
-package com.pia.camunda;
+package org.opentmf.camunda;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("it")
-class PiaCamundaApplicationIT {
+class OpenTmfCamundaApplicationIT {
 
   @Autowired
   private ApplicationContext applicationContext;

@@ -1,20 +1,26 @@
-# pia-camunda-7
-Camunda 7 with Spin, Incident Logger and OpenID auth for Keycloak
+# opentmf-camunda7
+Ann OpenTMF produced Spring Boot microservice that embeds the latest Camunda7 community edition with the public [Spin](https://docs.camunda.org/manual/latest/reference/spin/), and [OpenID auth for Keycloak](https://github.com/camunda-community-hub/camunda-platform-7-keycloak) plugins, as well as using OpenTMF's [Camunda7 Incident Logger](https://github.com/opentmf/camunda7-incident-logger), and [openid-rbac-security](https://github.com/opentmf/openid-rbac-security) framework to secure the API endpoints.
 
 ## Secure Endpoints
-This pia-camunda-7 project uses pia-security to secure its exposed endpoints. 
+This camunda7-openid-microservice project uses OpenTMF's [openid-rbac-security](https://github.com/opentmf/openid-rbac-security) to secure its exposed endpoints. 
 
-The default pia-security definitions whitelists all engine-rest endpoints so that the external task clients can communicate with the camunda server without authentication, whereas for all other endpoints requiring ADMIN or read or write accesses. Please see [config-security.yml](src/main/resources/config-security.yml)
+The default openid-rbac-security configuration requires read or write access for GET, write access for POST, PUST, and DELETE endpoints. These defaults can be overridden. Please see [config-security.yml](src/main/resources/config-security.yml) for initial configuration.
+
+## Workflow Variables Longer Than 4KB
+With the help of the public [Spin](https://docs.camunda.org/manual/latest/reference/spin/) plugin, longer than 4KB workflow variables can be used. The Spin plugin is included in the camunda7-openid-microservice project by default.
 
 ## Incident Logging
-When a failed task has zero retry counts, it is an indident and this incident is logged in WARN level. 
+OpenTMF's [Camunda7 Incident Logger](https://github.com/opentmf/camunda7-incident-logger) is used to write a log statement when a failed task has zero retry counts.
 
 ## Request - Response Logging
-In order to enable request - response logging, set the ollowing logging level to DEBUG. To cancel, set to INFO.
+In order to enable request - response logging, set the following logging level to DEBUG. To cancel, set to INFO.
 
 ```xml
 <logger name="org.glassfish.jersey.logging.LoggingFeature" level="DEBUG" />
 ```
+
+## Use Camunda UIs Through OpenID Authentication
+No need to setup users to access the Camunda7 user interfaces like Cockpit, Tasklist, and Admin. Just use Keycloak's OpenID authentication to access the UIs with the help of the [OpenID auth for Keycloak](https://github.com/camunda-community-hub/camunda-platform-7-keycloak) plugin.
 
 ## Building the Docker Image
 You can build a local docker image with the following command:
@@ -23,30 +29,33 @@ mvn -P docker clean package
 ```
 
 ## Version History
-- 21.0.0
+### 21.0.0
   - Initial Version
-- 22.0.0
+### 22.0.0
   - Updates to Camunda 7.22.0
-- 22.0.1
+### 22.0.1
   - Updates to camunda-incident-logger 1.0.1
   - Fix: Removed telemetry-reporter-activate property.
   - Decreased default value of historyTimeToLive to 92 days
-- 22.0.2
+### 22.0.2
   - Updated pia-security version from 1.0.2 to 1.0.3
-- 22.0.3
+### 22.0.3
   - Updated pia-security version from 1.0.3 to 1.0.5
   - Updated spring-boot version from 3.3.4 to 3.4.0
   - fix: default management server base path is now /
   - changed the project tagging format to just version
-- 22.0.4
+### 22.0.4
   - Updated camunda-incident-logger to 1.0.2
   - Prepended "v7." to the project tagging format
-- 22.0.5
+### 22.0.5
   - Updated pia-security to 1.0.6
   - Changed project tagging format and prepended just "v"
-- 22.0.6
-    - Updated pia-security to 1.0.7
-    - Minimized logging in default configuration
-    - Refined actuator endpoints related configuration
-    - Started requiring security on GET /actuator/env endpoints.
-    - Specified additional roles to unsanitize GET /actuator/env data
+### 22.0.6
+  - Updated pia-security to 1.0.7
+  - Minimized logging in default configuration
+  - Refined actuator endpoints related configuration
+  - Started requiring security on GET /actuator/env endpoints.
+  - Specified additional roles to unsanitize GET /actuator/env data
+### 23.0.0
+  - Updates Camunda to 7.23.0 and Spring Boot 3.4.4
+  - The first open source version, replacing the private PiA libraries with the open-sourced OpenTMF libraries.

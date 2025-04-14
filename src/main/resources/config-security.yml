@@ -1,5 +1,5 @@
 ---
-pia:
+opentmf:
   security:
     jwk-set-uri: http://localhost:8000/realms/rehearsal-realm/protocol/openid-connect/certs
     user-claim: sub

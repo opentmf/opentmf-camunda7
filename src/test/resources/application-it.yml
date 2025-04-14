@@ -1,10 +1,10 @@
-pia:
+opentmf:
   security:
     jwk-set-uri: classpath:jwk-set.json
 
 spring:
   datasource:
-    url: jdbc:tc:postgresql:16.1-alpine:///solhub
+    url: jdbc:tc:postgresql:16.4-alpine:///db
     hikari:
       schema: public
 

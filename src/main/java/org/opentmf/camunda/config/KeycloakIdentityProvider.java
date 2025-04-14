@@ -1,4 +1,4 @@
-package com.pia.camunda.config;
+package org.opentmf.camunda.config;
 
 import org.camunda.bpm.extension.keycloak.plugin.KeycloakIdentityProviderPlugin;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
