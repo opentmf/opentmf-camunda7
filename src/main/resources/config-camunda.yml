@@ -13,6 +13,7 @@ camunda.bpm:
     properties:
       historyTimeToLive: P92D
   webapp:
+    application-path: /
     header-security:
       content-security-policy-value: "base-uri 'self';
                                         script-src $NONCE 'strict-dynamic' 'unsafe-eval' https: 'self' 'unsafe-inline';
@@ -29,6 +30,27 @@ plugin.identity.keycloak:
   keycloak-admin-url: http://keycloak.iam-dev.svc.cluster.local/admin/realms/devtest
   client-id: xxx
   client-secret: xxx
-  use-username-as-camunda-user-id: true
+  use-username-as-camunda-user-id: false
+  use-email-as-camunda-user-id: true
   use-group-path-as-camunda-group-id: true
   administrator-group-name: camunda-admin
+
+spring.security.oauth2:
+  client:
+    registration:
+      keycloak:
+        provider: keycloak
+        client-id: ${plugin.identity.keycloak.client-id}
+        client-secret: ${plugin.identity.keycloak.client-secret}
+        authorization-grant-type: authorization_code
+        redirect-uri: "{baseUrl}/{action}/oauth2/code/{registrationId}"
+        scope: openid, profile, email
+    provider:
+      keycloak:
+        issuer-uri: ${plugin.identity.keycloak.keycloak-issuer-url}
+        authorization-uri: ${plugin.identity.keycloak.keycloak-issuer-url}/protocol/openid-connect/auth
+        user-info-uri: ${plugin.identity.keycloak.keycloak-issuer-url}/protocol/openid-connect/userinfo
+        token-uri: ${plugin.identity.keycloak.keycloak-issuer-url}/protocol/openid-connect/token
+        jwk-set-uri: ${plugin.identity.keycloak.keycloak-issuer-url}/protocol/openid-connect/certs
+        user-name-attribute: ${opentmf.security.user-claim}
+

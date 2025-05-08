@@ -1,8 +1,8 @@
 ---
 opentmf:
   security:
-    jwk-set-uri: http://localhost:8000/realms/rehearsal-realm/protocol/openid-connect/certs
-    user-claim: sub
+    jwk-set-uri: ${plugin.identity.keycloak.keycloak-issuer-url}/protocol/openid-connect/certs
+    user-claim: email
     authorities-claim: groups
     secure-endpoints:
       - method: GET
