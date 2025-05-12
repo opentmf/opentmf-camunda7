@@ -12,13 +12,17 @@ camunda.bpm:
   generic-properties:
     properties:
       historyTimeToLive: P92D
+  oauth2:
+    sso-logout:
+      enabled: true
+      postLogoutRedirectUri: "{baseUrl}/app/"
   webapp:
     application-path: /
     header-security:
       content-security-policy-value: "base-uri 'self';
                                         script-src $NONCE 'strict-dynamic' 'unsafe-eval' https: 'self' 'unsafe-inline';
                                         style-src 'unsafe-inline' 'self';
-                                        connect-src ${keycloak.url} 'self';
+                                        connect-src ${keycloak-issuer-url} 'self';
                                         default-src 'self';
                                         img-src 'self' data:;
                                         block-all-mixed-content;form-action 'self';
@@ -34,6 +38,7 @@ plugin.identity.keycloak:
   use-email-as-camunda-user-id: true
   use-group-path-as-camunda-group-id: true
   administrator-group-name: camunda-admin
+  cache-enabled: true
 
 spring.security.oauth2:
   client:
