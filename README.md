@@ -59,3 +59,7 @@ mvn -P docker clean package
 ### 23.0.0
   - Updates Camunda to 7.23.0 and Spring Boot 3.4.4
   - The first open source version, replacing the private PiA libraries with the open-sourced OpenTMF libraries.
+### 23.0.1
+  - Enabled SSO
+### 23.0.2
+  - Started using github docker registry

@@ -410,9 +410,14 @@
   <!-- Profile to create a local Docker image -->
   <profiles>
     <profile>
+      <id>repackage</id>
+      <properties>
+        <spring-boot.repackage.skip>false</spring-boot.repackage.skip>
+      </properties>
+    </profile>
+    <profile>
       <id>docker</id>
       <properties>
-        <!-- In the docker profile, enable repackaging -->
         <spring-boot.repackage.skip>false</spring-boot.repackage.skip>
       </properties>
       <build>

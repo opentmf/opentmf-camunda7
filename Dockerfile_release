@@ -1,0 +1,31 @@
+# Stage 1: Build the JAR using Maven
+FROM maven:3.9.9-eclipse-temurin-17 AS maven-build
+WORKDIR /build
+COPY pom.xml .
+COPY src ./src
+RUN mvn -Dmaven.test.skip=true -P repackage clean package
+
+# Stage 2: Extract layers using layertools
+FROM eclipse-temurin:17-jre-jammy AS layer-extract
+WORKDIR /application
+COPY --from=maven-build /build/target/*.jar application.jar
+RUN java -Djarmode=layertools -jar application.jar extract
+
+# Stage 3: Final runtime image
+FROM eclipse-temurin:17-jre-jammy
+RUN apt-get update && \
+    apt-get install -y curl iputils-ping procps rsync && \
+    rm -rf /var/lib/apt/lists/* && \
+    addgroup java && \
+    adduser --ingroup java --disabled-password java
+USER java
+WORKDIR /application
+COPY --from=layer-extract /application/dependencies/ ./
+COPY --from=layer-extract /application/spring-boot-loader/ ./
+COPY --from=layer-extract /application/snapshot-dependencies/ ./
+COPY --from=layer-extract /application/application/ ./
+ENV SERVER_PORT=8080
+EXPOSE $SERVER_PORT
+ENV JVM_OPTS="-Duser.timezone=UTC"
+ENV JVM_OPTS="${JVM_OPTS} -Dserver.port=${SERVER_PORT}"
+CMD java ${JVM_OPTS} org.springframework.boot.loader.launch.JarLauncher
