@@ -1,0 +1,19 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "release/**" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Docker image
+      run: |
+        docker login --username gokhanus --password ${{ secrets.GH_TOKEN }} ghcr.io
+        docker build . --file Dockerfile_release --tag opentmf/opentmf-camunda7:v23.0.1
+        docker push ghcr.io/opentmf/opentmf-camunda7:v23.0.1
