@@ -10,40 +10,32 @@ opentmf:
         roles:
           - read
           - write
-          - ENTERPRISE-GUI/ADMIN_ALL
-          - ENTERPRISE-API/ADMIN_ALL
+          - admin
       - method: POST
         path: /engine-rest/**
         roles:
           - write
-          - ENTERPRISE-GUI/ADMIN_ALL
-          - ENTERPRISE-API/ADMIN_ALL
+          - admin
       - method: PUT
         path: /engine-rest/**
         roles:
           - write
-          - ENTERPRISE-GUI/ADMIN_ALL
-          - ENTERPRISE-API/ADMIN_ALL
+          - admin
       - method: DELETE
         path: /engine-rest/**
         roles:
           - write
-          - ENTERPRISE-GUI/ADMIN_ALL
-          - ENTERPRISE-API/ADMIN_ALL
+          - admin
 
       # Actuator Endpoints That Require Authorization
       - method: GET
         path: /actuator/env
         roles:
-          - write
-          - ENTERPRISE-GUI/ADMIN_ALL
-          - ENTERPRISE-API/ADMIN_ALL
+          - admin
       - method: GET
         path: /actuator/env/**
         roles:
-          - write
-          - ENTERPRISE-GUI/ADMIN_ALL
-          - ENTERPRISE-API/ADMIN_ALL
+          - admin
 
     whitelist:
       - /error

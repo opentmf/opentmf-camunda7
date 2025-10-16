@@ -12,6 +12,7 @@ camunda.bpm:
   generic-properties:
     properties:
       historyTimeToLive: P92D
+      legacyJobRetryBehaviorEnabled: true
   oauth2:
     sso-logout:
       enabled: true
