@@ -1,7 +1,6 @@
 package org.opentmf.camunda.config.sso;
 
 import static org.springframework.security.config.Customizer.withDefaults;
-import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 import jakarta.annotation.Nullable;
 import jakarta.servlet.DispatcherType;
@@ -17,11 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.security.oauth2.client.ClientsConfiguredCondition;
+import org.springframework.boot.autoconfigure.security.oauth2.client.ConditionalOnOAuth2ClientRegistrationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,7 +28,9 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 /**
  * @author Abdullah Beker
@@ -39,7 +39,7 @@ import org.springframework.security.web.util.matcher.OrRequestMatcher;
   CamundaBpmAutoConfiguration.class,
   SpringProcessEngineServicesConfiguration.class
 })
-@Conditional(ClientsConfiguredCondition.class)
+@ConditionalOnOAuth2ClientRegistrationProperties
 @EnableConfigurationProperties(OAuth2Properties.class)
 @Configuration
 public class CamundaSpringSecurityOAuth2AutoConfiguration {
@@ -99,16 +99,22 @@ public class CamundaSpringSecurityOAuth2AutoConfiguration {
 
     logger.info("Enabling Camunda Spring Security oauth2 integration");
 
-    http.securityMatcher(
-            new OrRequestMatcher(
-                antMatcher("/app/**"),
-                antMatcher("/api/**"),
-                antMatcher("/oauth2/**"),
-                antMatcher("/login/**"),
-                antMatcher("/logout"),
-                antMatcher("/lib/**"),
-                antMatcher("/assets/**"),
-                antMatcher("/favicon.ico")))
+    // Builder that uses PathPatternParser.defaultInstance and treats patterns
+    // as relative to the context path (recommended)
+    var pp = PathPatternRequestMatcher.withDefaults();
+
+    RequestMatcher appEndpoints =
+        new OrRequestMatcher(
+            pp.matcher("/app/**"),
+            pp.matcher("/api/**"),
+            pp.matcher("/oauth2/**"),
+            pp.matcher("/login/**"),
+            pp.matcher("/logout"),
+            pp.matcher("/lib/**"),
+            pp.matcher("/assets/**"),
+            pp.matcher("/favicon.ico"));
+
+    http.securityMatcher(appEndpoints)
         .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
         .addFilterAfter(authorizeTokenFilter, OAuth2AuthorizationRequestRedirectFilter.class)
         .anonymous(AbstractHttpConfigurer::disable)

@@ -2,7 +2,7 @@
 Ann OpenTMF produced Spring Boot microservice that embeds the latest Camunda7 community edition with the public [Spin](https://docs.camunda.org/manual/latest/reference/spin/), and [OpenID auth for Keycloak](https://github.com/camunda-community-hub/camunda-platform-7-keycloak) plugins, as well as using OpenTMF's [Camunda7 Incident Logger](https://github.com/opentmf/camunda7-incident-logger), and [openid-rbac-security](https://github.com/opentmf/openid-rbac-security) framework to secure the API endpoints.
 
 ## Secure Endpoints
-This camunda7-openid-microservice project uses OpenTMF's [openid-rbac-security](https://github.com/opentmf/openid-rbac-security) to secure its exposed endpoints. 
+This camunda7-openid-microservice project uses OpenTMF's [openid-rbac-security](https://github.com/opentmf/openid-rbac-security) to secure its exposed endpoints.
 
 The default openid-rbac-security configuration requires read or write access for GET, write access for POST, PUST, and DELETE endpoints. These defaults can be overridden. Please see [config-security.yml](src/main/resources/config-security.yml) for initial configuration.
 
@@ -22,11 +22,14 @@ In order to enable request - response logging, set the following logging level t
 ## Use Camunda UIs Through OpenID Authentication
 No need to setup users to access the Camunda7 user interfaces like Cockpit, Tasklist, and Admin. Just use Keycloak's OpenID authentication to access the UIs with the help of the [OpenID auth for Keycloak](https://github.com/camunda-community-hub/camunda-platform-7-keycloak) plugin.
 
-## Building the Docker Image
+## Building a Local Docker Image
 You can build a local docker image with the following command:
 ```shell
-mvn -P docker clean package
+mvn -Dmaven.test.skip -Dmaven.javadoc.skip=true -Dmaven.source.skip=true -P docker clean package
 ```
+
+## Using a Public Docker Image
+Please visit [GitHub Packages for opentmf-camunda7](https://github.com/orgs/opentmf/packages/container/package/opentmf-camunda7) for the released docker images.
 
 ## Version History
 ### 21.0.0
@@ -63,3 +66,5 @@ mvn -P docker clean package
   - Enabled SSO
 ### 23.0.2
   - Started using github docker registry
+### 24.0.0
+  - Upgrades Camunda7 embedded engine to Camunda 7.24 Community

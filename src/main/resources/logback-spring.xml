@@ -20,11 +20,14 @@
 
 	<!-- OpenTMF -->
 	<logger name="org.opentmf" level="TRACE" />
+	<logger name="org.opentmf.camunda.config.sso.AuthorizeTokenFilter" level="INFO" />
 
 	<!-- Camunda -->
 	<logger name="org.camunda" level="INFO" />
 	<logger name="cockpit" level="INFO" />
 	<logger name="admin" level="INFO" />
+	<logger name="tasklist" level="INFO" />
+	<logger name="welcome" level="INFO" />
 
 	<!-- INFO: disable request / response logging of Camunda Server
 	     DEBUG: Enable (only for testing and/or troubleshooting purposes) -->
