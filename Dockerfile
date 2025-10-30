@@ -1,3 +1,11 @@
+# Download OpenTelemetry Java agent
+ARG OTEL_AGENT_VERSION=2.21.0
+FROM alpine:3.20 AS otel-agent
+ARG OTEL_AGENT_VERSION
+RUN apk add --no-cache curl \
+    && curl -fsSL -o /opentelemetry-javaagent.jar \
+    "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_AGENT_VERSION}/opentelemetry-javaagent.jar"
+
 # the lightweight alpine does not support arm64
 # hence another lightweight distro jammy for broader coverage
 FROM eclipse-temurin:17-jre-jammy AS builder
@@ -8,24 +16,32 @@ RUN java -Djarmode=layertools -jar application.jar extract
 
 FROM eclipse-temurin:17-jre-jammy
 RUN apt-get update && \
-    apt-get install -y curl iputils-ping procps rsync && \
+    apt-get install -y curl jq iputils-ping procps rsync && \
     rm -rf /var/lib/apt/lists/* && \
     addgroup java && \
     adduser --ingroup java --disabled-password java
 USER java
 WORKDIR /application
-COPY --from=builder /application/dependencies/ ./
-COPY --from=builder /application/spring-boot-loader/ ./
-COPY --from=builder /application/snapshot-dependencies/ ./
-COPY --from=builder /application/application/ ./
+COPY --chown=java:java --from=builder /application/dependencies/ ./
+COPY --chown=java:java --from=builder /application/spring-boot-loader/ ./
+COPY --chown=java:java --from=builder /application/snapshot-dependencies/ ./
+COPY --chown=java:java --from=builder /application/application/ ./
+
+## copy the agent into the final image without keeping curl
+COPY --chown=java:java --from=otel-agent /opentelemetry-javaagent.jar /addons/opentelemetry-javaagent.jar
+ENV OTEL_AGENT_PATH=/addons/opentelemetry-javaagent.jar
+
 ENV SERVER_PORT=8080
 ENV DEBUG_PORT=5005
 EXPOSE $SERVER_PORT
 EXPOSE ${DEBUG_PORT}
+
 ENV JVM_OPTS="-Duser.timezone=UTC"
 ENV JVM_OPTS="${JVM_OPTS} -XX:InitialRAMPercentage=25.0"
 ENV JVM_OPTS="${JVM_OPTS} -XX:MinRAMPercentage=25.0"
 ENV JVM_OPTS="${JVM_OPTS} -XX:MaxRAMPercentage=50.0"
 ENV JVM_OPTS="${JVM_OPTS} -Dserver.port=${SERVER_PORT}"
 ENV JVM_OPTS="${JVM_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${DEBUG_PORT}"
-CMD java ${JVM_OPTS} org.springframework.boot.loader.launch.JarLauncher
+
+ENTRYPOINT ["sh","-lc","exec java ${JAVA_TOOL_OPTIONS} ${JVM_OPTS} org.springframework.boot.loader.launch.JarLauncher"]
+CMD []

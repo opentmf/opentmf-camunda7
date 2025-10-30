@@ -22,6 +22,119 @@ In order to enable request - response logging, set the following logging level t
 ## Use Camunda UIs Through OpenID Authentication
 No need to setup users to access the Camunda7 user interfaces like Cockpit, Tasklist, and Admin. Just use Keycloak's OpenID authentication to access the UIs with the help of the [OpenID auth for Keycloak](https://github.com/camunda-community-hub/camunda-platform-7-keycloak) plugin.
 
+
+## OpenTelemetry (opt-in)
+
+This image bundles the [OpenTelemetry Java agent] at build time. It is **disabled by default** and can be turned on at runtime—no rebuild needed.
+
+**Agent path:** `/addons/opentelemetry-javaagent.jar` (also available via `$OTEL_AGENT_PATH`)
+
+### Quick start (Docker / Compose)
+
+Enable the agent by setting `JAVA_TOOL_OPTIONS` (the JVM reads this automatically):
+
+```yaml
+services:
+  camunda7:
+    image: ghcr.io/opentmf/opentmf-camunda7:24
+    environment:
+      # Enable the agent (no rebuild required):
+      JAVA_TOOL_OPTIONS: "-javaagent:/addons/opentelemetry-javaagent.jar"
+
+      # Minimal OTel config (adjust to your setup):
+      OTEL_SERVICE_NAME: "opentmf-camunda7"
+      OTEL_ENABLED: true
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_LOGS_EXPORTER: otlp
+      OTEL_METRICS_EXPORTER: otlp
+      OTEL_RESOURCE_ATTRIBUTES: "deployment.environment=dev,service.namespace=opentmf"
+```
+
+**Plain docker run:**
+```bash
+docker run --rm \
+       -e JAVA_TOOL_OPTIONS="-javaagent:/addons/opentelemetry-javaagent.jar" \
+       -e OTEL_SERVICE_NAME=opentmf-camunda7 \
+       -e OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317 \
+       -e OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
+       ghcr.io/opentmf/opentmf-camunda7:24
+```
+
+### Kubernetes example (Deployment)
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: camunda7
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: camunda7 }
+  template:
+    metadata:
+      labels: { app: camunda7 }
+    spec:
+      containers:
+        - name: camunda7
+          image: ghcr.io/opentmf/opentmf-camunda7:YOUR_TAG
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-javaagent:/addons/opentelemetry-javaagent.jar"
+            - name: OTEL_SERVICE_NAME
+              value: "opentmf-camunda7"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector:4317"
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "grpc"
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: "deployment.environment=prod,service.namespace=opentmf"
+```
+
+### Common configuration
+
+- **Service name:** `OTEL_SERVICE_NAME=opentmf-camunda7`
+- **Collector endpoint:**
+    - gRPC: `OTEL_EXPORTER_OTLP_ENDPOINT=http://<collector>:4317` + `OTEL_EXPORTER_OTLP_PROTOCOL=grpc`
+    - HTTP/Protobuf: `...:4318` + `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf`
+- **Resources/labels:** `OTEL_RESOURCE_ATTRIBUTES=deployment.environment=dev,service.namespace=opentmf`
+- **Sampling (optional):**
+  ```bash
+  OTEL_TRACES_SAMPLER=parentbased_traceidratio
+  OTEL_TRACES_SAMPLER_ARG=0.1   # 10% sampling
+  ```
+- **Propagators (optional):** `OTEL_PROPAGATORS=tracecontext,baggage` (default) or `b3` if you need Zipkin/B3.
+
+### Disable or limit signals
+
+- Turn everything off quickly: `OTEL_SDK_DISABLED=true`
+- Traces only:
+  ```bash
+  OTEL_METRICS_EXPORTER=none
+  OTEL_LOGS_EXPORTER=none
+  ```
+
+### Advanced: override agent version at build time
+
+The Dockerfiles download the agent using an overridable build arg:
+
+```bash
+# for example:
+docker build -f Dockerfile_release  \
+       --build-arg OTEL_AGENT_VERSION=2.21.0 \
+       -t ghcr.io/opentmf/opentmf-camunda7:otel-2.21.0 .
+```
+
+### Notes
+
+- `-javaagent` must be applied **before** `-jar`. Using `JAVA_TOOL_OPTIONS` guarantees the flag is injected correctly.
+- Typical overhead is modest; if you need to trim it, use sampling and/or disable unneeded instrumentations/metrics/logs.
+- Camunda 7 and common Spring libraries are auto-instrumented by the agent; you usually do **not** need code changes.
+
+[OpenTelemetry Java agent]: https://github.com/open-telemetry/opentelemetry-java-instrumentation
+
 ## Building a Local Docker Image
 You can build a local docker image with the following command:
 ```shell
@@ -68,3 +181,8 @@ Please visit [GitHub Packages for opentmf-camunda7](https://github.com/orgs/open
   - Started using github docker registry
 ### 24.0.0
   - Upgrades Camunda7 embedded engine to Camunda 7.24 Community
+### 24.0.1
+  - Upgrades Spring Boot to 3.5.7
+  - Upgrades camunda-platform-7-keycloak.version to 7.24.0
+  - Adds opentelemetry-javaagent.jar to /addons folder of the docker image.
+  - Starts producing semver tags
