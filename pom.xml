@@ -9,7 +9,7 @@
   <groupId>org.opentmf.camunda</groupId>
   <artifactId>opentmf-camunda7</artifactId>
   <name>opentmf-camunda7</name>
-  <version>24.0.1-SNAPSHOT</version>
+  <version>24.0.1</version>
 
   <description>
     An OpenTMF produced Spring Boot microservice that embeds the latest Camunda7 community edition
@@ -481,7 +481,7 @@
     <url>https://github.com/opentmf/opentmf-camunda7</url>
     <connection>scm:git:git@github.com:opentmf/opentmf-camunda7.git</connection>
     <developerConnection>scm:git:git@github.com:opentmf/opentmf-camunda7.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>24.0.1</tag>
   </scm>
 
 </project>
