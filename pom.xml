@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.6</version>
+    <version>3.5.7</version>
   </parent>
   <groupId>org.opentmf.camunda</groupId>
   <artifactId>opentmf-camunda7</artifactId>
@@ -66,11 +66,11 @@
 
     <!-- Application dependencies -->
     <camunda.version>7.24.0</camunda.version>
-    <camunda-platform-7-keycloak.version>7.23.0</camunda-platform-7-keycloak.version>
+    <camunda-platform-7-keycloak.version>7.24.0</camunda-platform-7-keycloak.version>
     <camunda-spin.version>7.24.0</camunda-spin.version>
     <openid-rbac-security.version>1.1.0</openid-rbac-security.version>
     <camunda-incident-logger.version>1.0.4</camunda-incident-logger.version>
-    <graalvm.version>25.0.0</graalvm.version>
+    <graalvm.version>25.0.1</graalvm.version>
 
     <archunit.version>1.4.1</archunit.version>
     <testcontainers.version>1.21.3</testcontainers.version>
@@ -86,46 +86,30 @@
     <!-- Sonar properties -->
     <sonar.coverage.exclusions>**/OpenTmfCamunda7Application.java</sonar.coverage.exclusions>
     <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
-
-    <!-- Temporarily managed dependencies to get rid of conflicts -->
-    <java-uuid-generator.version>5.1.1</java-uuid-generator.version>
-    <checker-qual.version>3.51.1</checker-qual.version>
-    <error_prone_annotations.version>2.42.0</error_prone_annotations.version>
-    <commons-io.version>2.17.0</commons-io.version>
-    <nimbus-jose-jwt.version>9.37.4</nimbus-jose-jwt.version>
   </properties>
 
   <dependencyManagement>
+    <!-- managing conflicting dependencies -->
     <dependencies>
-      <dependency>
-        <groupId>org.camunda.commons</groupId>
-        <artifactId>camunda-commons-logging</artifactId>
-        <version>${camunda.version}</version>
-      </dependency>
       <dependency>
         <groupId>com.fasterxml.uuid</groupId>
         <artifactId>java-uuid-generator</artifactId>
-        <version>${java-uuid-generator.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.checkerframework</groupId>
-        <artifactId>checker-qual</artifactId>
-        <version>${checker-qual.version}</version>
+        <version>5.1.1</version>
       </dependency>
       <dependency>
         <groupId>com.google.errorprone</groupId>
         <artifactId>error_prone_annotations</artifactId>
-        <version>${error_prone_annotations.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>${commons-io.version}</version>
+        <version>2.41.0</version>
       </dependency>
       <dependency>
         <groupId>com.nimbusds</groupId>
         <artifactId>nimbus-jose-jwt</artifactId>
-        <version>${nimbus-jose-jwt.version}</version>
+        <version>9.37.4</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.17.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -358,7 +342,7 @@
         <configuration>
           <useReleaseProfile>false</useReleaseProfile>
           <goals>deploy</goals>
-          <tagNameFormat>v@{project.version}</tagNameFormat>
+          <tagNameFormat>@{project.version}</tagNameFormat>
         </configuration>
       </plugin>
       <plugin>
