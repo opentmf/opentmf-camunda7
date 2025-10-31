@@ -127,12 +127,6 @@ docker build -f Dockerfile_release  \
        -t ghcr.io/opentmf/opentmf-camunda7:otel-2.21.0 .
 ```
 
-### Notes
-
-- `-javaagent` must be applied **before** `-jar`. Using `JAVA_TOOL_OPTIONS` guarantees the flag is injected correctly.
-- Typical overhead is modest; if you need to trim it, use sampling and/or disable unneeded instrumentations/metrics/logs.
-- Camunda 7 and common Spring libraries are auto-instrumented by the agent; you usually do **not** need code changes.
-
 [OpenTelemetry Java agent]: https://github.com/open-telemetry/opentelemetry-java-instrumentation
 
 ## Building a Local Docker Image
@@ -186,3 +180,5 @@ Please visit [GitHub Packages for opentmf-camunda7](https://github.com/orgs/open
   - Upgrades camunda-platform-7-keycloak.version to 7.24.0
   - Adds opentelemetry-javaagent.jar to /addons folder of the docker image.
   - Starts producing semver tags
+### 24.0.2
+  - Fixes the manual expansion of `JAVA_TOOL_OPTIONS` in the Docker entrypoint
