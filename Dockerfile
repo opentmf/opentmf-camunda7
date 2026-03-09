@@ -1,11 +1,3 @@
-# Download OpenTelemetry Java agent
-ARG OTEL_AGENT_VERSION=2.21.0
-FROM alpine:3.20 AS otel-agent
-ARG OTEL_AGENT_VERSION
-RUN apk add --no-cache curl \
-    && curl -fsSL -o /opentelemetry-javaagent.jar \
-    "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_AGENT_VERSION}/opentelemetry-javaagent.jar"
-
 # the lightweight alpine does not support arm64
 # hence another lightweight distro jammy for broader coverage
 FROM eclipse-temurin:17-jre-jammy AS builder
@@ -26,10 +18,6 @@ COPY --chown=java:java --from=builder /application/dependencies/ ./
 COPY --chown=java:java --from=builder /application/spring-boot-loader/ ./
 COPY --chown=java:java --from=builder /application/snapshot-dependencies/ ./
 COPY --chown=java:java --from=builder /application/application/ ./
-
-## copy the agent into the final image without keeping curl
-COPY --chown=java:java --from=otel-agent /opentelemetry-javaagent.jar /addons/opentelemetry-javaagent.jar
-ENV OTEL_AGENT_PATH=/addons/opentelemetry-javaagent.jar
 
 ENV SERVER_PORT=8080
 ENV DEBUG_PORT=5005

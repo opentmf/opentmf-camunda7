@@ -1,17 +1,10 @@
-# Download OpenTelemetry Java agent
-ARG OTEL_AGENT_VERSION=2.21.0
-FROM alpine:3.20 AS otel-agent
-ARG OTEL_AGENT_VERSION
-RUN apk add --no-cache curl \
-    && curl -fsSL -o /opentelemetry-javaagent.jar \
-    "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_AGENT_VERSION}/opentelemetry-javaagent.jar"
-
 # Stage 1: Build the JAR using Maven
 FROM maven:3.9.9-eclipse-temurin-17 AS maven-build
 WORKDIR /build
+ARG MAVEN_PROFILES=repackage
 COPY pom.xml .
 COPY src ./src
-RUN mvn -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dmaven.source.skip=true -P repackage clean package
+RUN mvn -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dmaven.source.skip=true -P ${MAVEN_PROFILES} clean package
 
 # Stage 2: Extract layers using layertools
 FROM eclipse-temurin:17-jre-jammy AS layer-extract
@@ -32,10 +25,6 @@ COPY --chown=java:java --from=layer-extract /application/dependencies/ ./
 COPY --chown=java:java --from=layer-extract /application/spring-boot-loader/ ./
 COPY --chown=java:java --from=layer-extract /application/snapshot-dependencies/ ./
 COPY --chown=java:java --from=layer-extract /application/application/ ./
-
-# copy opentelemetry java agent
-COPY --from=otel-agent /opentelemetry-javaagent.jar /addons/opentelemetry-javaagent.jar
-ENV OTEL_AGENT_PATH=/addons/opentelemetry-javaagent.jar
 
 # set minimal JVM options
 ENV SERVER_PORT=8080

@@ -68,24 +68,29 @@
     <camunda.version>7.24.0</camunda.version>
     <camunda-platform-7-keycloak.version>7.24.0</camunda-platform-7-keycloak.version>
     <camunda-spin.version>7.24.0</camunda-spin.version>
-    <openid-rbac-security.version>1.1.0</openid-rbac-security.version>
+    <openid-rbac-security.version>1.1.1</openid-rbac-security.version>
     <camunda-incident-logger.version>1.0.4</camunda-incident-logger.version>
-    <graalvm.version>25.0.1</graalvm.version>
+    <graalvm.version>25.0.2</graalvm.version>
 
     <archunit.version>1.4.1</archunit.version>
-    <testcontainers.version>1.21.3</testcontainers.version>
-    <testcontainers-keycloak.version>3.9.0</testcontainers-keycloak.version>
+    <testcontainers.version>1.21.4</testcontainers.version>
+    <testcontainers-keycloak.version>4.1.1</testcontainers-keycloak.version>
 
     <!-- Maven plugins -->
     <exec-maven-plugin.version>3.5.0</exec-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
-    <sonar-plugin.version>5.2.0.4988</sonar-plugin.version>
+    <sonar-plugin.version>5.5.0.6356</sonar-plugin.version>
     <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
-    <central-publishing-maven-plugin.version>0.9.0</central-publishing-maven-plugin.version>
+    <central-publishing-maven-plugin.version>0.10.0</central-publishing-maven-plugin.version>
 
     <!-- Sonar properties -->
     <sonar.coverage.exclusions>**/OpenTmfCamunda7Application.java</sonar.coverage.exclusions>
     <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
+
+    <!-- AWS-IAM related properties -->
+    <aws-msk-iam-auth.version>2.3.5</aws-msk-iam-auth.version>
+    <awssdk-sts.version>2.42.8</awssdk-sts.version>
+    <aws-advanced-jdbc-wrapper.version>3.2.0</aws-advanced-jdbc-wrapper.version>
   </properties>
 
   <dependencyManagement>
@@ -426,6 +431,31 @@
 
   <!-- Profile to create a local Docker image -->
   <profiles>
+    <profile>
+      <id>aws-iam</id>
+      <dependencies>
+        <dependency>
+          <groupId>software.amazon.msk</groupId>
+          <artifactId>aws-msk-iam-auth</artifactId>
+          <version>${aws-msk-iam-auth.version}</version>
+          <scope>runtime</scope>
+        </dependency>
+        <!-- AWS JDBC wrapper driver -->
+        <dependency>
+          <groupId>software.amazon.jdbc</groupId>
+          <artifactId>aws-advanced-jdbc-wrapper</artifactId>
+          <version>${aws-advanced-jdbc-wrapper.version}</version>
+          <scope>runtime</scope>
+        </dependency>
+        <!-- Required for IRSA / WebIdentity credentials on Java -->
+        <dependency>
+          <groupId>software.amazon.awssdk</groupId>
+          <artifactId>sts</artifactId>
+          <version>${awssdk-sts.version}</version>
+          <scope>runtime</scope>
+        </dependency>
+      </dependencies>
+    </profile>
     <profile>
       <id>repackage</id>
       <properties>
