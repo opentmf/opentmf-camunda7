@@ -8,23 +8,23 @@ opentmf:
       - method: GET
         path: /engine-rest/**
         roles:
-          - read
-          - write
+          - reader
+          - writer
           - admin
       - method: POST
         path: /engine-rest/**
         roles:
-          - write
+          - writer
           - admin
       - method: PUT
         path: /engine-rest/**
         roles:
-          - write
+          - writer
           - admin
       - method: DELETE
         path: /engine-rest/**
         roles:
-          - write
+          - writer
           - admin
 
       # Actuator Endpoints That Require Authorization

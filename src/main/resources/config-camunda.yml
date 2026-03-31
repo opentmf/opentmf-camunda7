@@ -1,4 +1,9 @@
 ---
+# Browser-facing Keycloak URL. Defaults to the server-to-server issuer URL.
+# Override via KEYCLOAK_URL_AUTH when browsers reach Keycloak at a different
+# address than the application (e.g. Citrix, split-DNS, external Ingress).
+keycloak.url.auth: ${plugin.identity.keycloak.keycloak-issuer-url}
+
 camunda.bpm:
   authorization:
     enabled: true
@@ -23,7 +28,7 @@ camunda.bpm:
       content-security-policy-value: "base-uri 'self';
                                         script-src $NONCE 'strict-dynamic' 'unsafe-eval' https: 'self' 'unsafe-inline';
                                         style-src 'unsafe-inline' 'self';
-                                        connect-src ${keycloak-issuer-url} 'self';
+                                        connect-src ${keycloak.url.auth} 'self';
                                         default-src 'self';
                                         img-src 'self' data:;
                                         block-all-mixed-content;form-action 'self';
@@ -53,10 +58,9 @@ spring.security.oauth2:
         scope: openid, profile, email
     provider:
       keycloak:
-        issuer-uri: ${plugin.identity.keycloak.keycloak-issuer-url}
-        authorization-uri: ${plugin.identity.keycloak.keycloak-issuer-url}/protocol/openid-connect/auth
-        user-info-uri: ${plugin.identity.keycloak.keycloak-issuer-url}/protocol/openid-connect/userinfo
+        authorization-uri: ${keycloak.url.auth}/protocol/openid-connect/auth
         token-uri: ${plugin.identity.keycloak.keycloak-issuer-url}/protocol/openid-connect/token
         jwk-set-uri: ${plugin.identity.keycloak.keycloak-issuer-url}/protocol/openid-connect/certs
+        user-info-uri: ${plugin.identity.keycloak.keycloak-issuer-url}/protocol/openid-connect/userinfo
         user-name-attribute: ${opentmf.security.user-claim}
 
