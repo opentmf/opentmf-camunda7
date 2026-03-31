@@ -4,7 +4,7 @@ Ann OpenTMF produced Spring Boot microservice that embeds the latest Camunda7 co
 ## Secure Endpoints
 This camunda7-openid-microservice project uses OpenTMF's [openid-rbac-security](https://github.com/opentmf/openid-rbac-security) to secure its exposed endpoints.
 
-The default openid-rbac-security configuration requires read or write access for GET, write access for POST, PUST, and DELETE endpoints. These defaults can be overridden. Please see [config-security.yml](src/main/resources/config-security.yml) for initial configuration.
+The default openid-rbac-security configuration requires read or write access for GET, write access for POST, PUT, and DELETE endpoints. These defaults can be overridden. Please see [config-security.yml](src/main/resources/config-security.yml) for initial configuration.
 
 ## Workflow Variables Longer Than 4KB
 With the help of the public [Spin](https://docs.camunda.org/manual/latest/reference/spin/) plugin, longer than 4KB workflow variables can be used. The Spin plugin is included in the camunda7-openid-microservice project by default.
@@ -22,6 +22,96 @@ In order to enable request - response logging, set the following logging level t
 ## Use Camunda UIs Through OpenID Authentication
 No need to setup users to access the Camunda7 user interfaces like Cockpit, Tasklist, and Admin. Just use Keycloak's OpenID authentication to access the UIs with the help of the [OpenID auth for Keycloak](https://github.com/camunda-community-hub/camunda-platform-7-keycloak) plugin.
 
+## Deployment Configuration
+
+The application is configured through environment variables. The tables below list the key variables; see [application.yml](src/main/resources/application.yml), [config-camunda.yml](src/main/resources/config-camunda.yml), and [config-security.yml](src/main/resources/config-security.yml) for the full set of defaults.
+
+### General
+
+| Environment Variable | Description | Default |
+|---|---|---|
+| `SPRING_PROFILES_ACTIVE` | Comma-separated list of active Spring profiles. | — |
+| `LOGGING_CONFIG` | Path to a custom Logback configuration file. | built-in default |
+| `SERVER_FORWARD_HEADERS_STRATEGY` | Strategy for handling forwarded headers (`framework`, `native`, `none`). Set to `framework` when running behind a reverse proxy or Ingress. | `none` |
+
+### Database
+
+| Environment Variable | Description | Default |
+|---|---|---|
+| `SPRING_DATASOURCE_URL` | JDBC connection URL. | `jdbc:postgresql://postgresql:5432/db?useUnicode=yes&characterEncoding=UTF-8&currentSchema=camunda7` |
+| `SPRING_DATASOURCE_USERNAME` | Database user. | `camunda7` |
+| `SPRING_DATASOURCE_PASSWORD` | Database password. | — |
+| `SPRING_DATASOURCE_HIKARI_SCHEMA` | Schema used by the Camunda engine tables and the HikariCP connection pool. | `camunda7` |
+
+### Keycloak / OpenID
+
+| Environment Variable | Description | Default |
+|---|---|---|
+| `PLUGIN_IDENTITY_KEYCLOAK_KEYCLOAK_ISSUER_URL` | Server-to-server Keycloak realm URL. Used by the identity provider plugin to query users/groups and by Spring Security for token exchange, JWK Set retrieval, and user-info calls. | `http://keycloak.iam-dev.svc.cluster.local/realms/devtest` |
+| `PLUGIN_IDENTITY_KEYCLOAK_KEYCLOAK_ADMIN_URL` | Keycloak Admin REST API URL for the realm. | `http://keycloak.iam-dev.svc.cluster.local/admin/realms/devtest` |
+| `PLUGIN_IDENTITY_KEYCLOAK_CLIENT_ID` | OAuth2 client ID registered in Keycloak. | `xxx` |
+| `PLUGIN_IDENTITY_KEYCLOAK_CLIENT_SECRET` | OAuth2 client secret. | `xxx` |
+| `KEYCLOAK_URL_AUTH` | Browser-facing Keycloak realm URL. Used for the OAuth2 authorization redirect and the CSP `connect-src` header. Defaults to `PLUGIN_IDENTITY_KEYCLOAK_KEYCLOAK_ISSUER_URL`, so in standard deployments only the issuer URL needs to be set. Override this when browsers reach Keycloak at a different address than the application (e.g. Citrix, split-DNS, external Ingress). | same as `PLUGIN_IDENTITY_KEYCLOAK_KEYCLOAK_ISSUER_URL` |
+| `OPENTMF_SECURITY_USER_CLAIM` | JWT claim used as the authenticated user's identity (e.g. `email`, `preferred_username`, `sub`). | `email` |
+| `OPENTMF_SECURITY_AUTHORITIES_CLAIM` | JWT claim that carries the user's role/group list. | `groups` |
+
+### Split-URL deployments
+
+In environments where the browser-facing Keycloak address differs from the address reachable by the application (e.g. when accessing through Citrix or a corporate proxy), set both variables independently:
+
+```yaml
+# K8s service address — used for all server-to-server communication
+PLUGIN_IDENTITY_KEYCLOAK_KEYCLOAK_ISSUER_URL: https://keycloak.iam.svc.cluster.local/realms/myRealm
+# Browser-facing address — used for OAuth2 authorization redirects
+KEYCLOAK_URL_AUTH: https://keycloak.internal.company.com/realms/myRealm
+```
+
+In standard deployments where a single URL is reachable from both the browser and the application, only `PLUGIN_IDENTITY_KEYCLOAK_KEYCLOAK_ISSUER_URL` needs to be set; `KEYCLOAK_URL_AUTH` inherits the same value automatically.
+
+### Overriding Role Mappings
+It is possible to override the default role mappings for specific endpoints. Given that we set:
+- `SPRING_PROFILES_ACTIVE=test`
+- `SPRING_CONFIG_ADDITIONAL_LOCATION=file:/application/`
+
+the following configuration can be supplied in a file mounted on `/application/application-test.yml`. Of course different roles can be specified than the below example.
+
+```yaml
+---
+opentmf:
+  security:
+    secure-endpoints:
+      - method: GET
+        path: /engine-rest/**
+        roles:
+          - reader
+          - writer
+          - admin
+      - method: POST
+        path: /engine-rest/**
+        roles:
+          - writer
+          - admin
+      - method: PUT
+        path: /engine-rest/**
+        roles:
+          - writer
+          - admin
+      - method: DELETE
+        path: /engine-rest/**
+        roles:
+          - writer
+          - admin
+
+      # Actuator Endpoints That Require Authorization
+      - method: GET
+        path: /actuator/env
+        roles:
+          - admin
+      - method: GET
+        path: /actuator/env/**
+        roles:
+          - admin
+```
 
 ## AWS IAM Authentication Support
 

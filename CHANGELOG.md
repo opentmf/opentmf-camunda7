@@ -1,64 +1,119 @@
 # Changelog
 
-All notable changes to this project are documented in this file.
+All notable changes to this project will be documented in this file.
 
-## 24.0.3
-- Adds AWS IAM authentication support via a dedicated `-aws` image variant
-- Removes bundled OpenTelemetry Java agent from Docker images
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## 24.0.2
-- Fixes the manual expansion of `JAVA_TOOL_OPTIONS` in the Docker entrypoint
+## [24.0.4] - 2026-03-31
 
-## 24.0.1
-- Upgrades Spring Boot to 3.5.7
-- Upgrades camunda-platform-7-keycloak to 7.24.0
-- Bundles opentelemetry-javaagent.jar in the `/addons` folder of the Docker image
-- Starts producing semver tags
+### Changed
+- Upgrade Spring Boot to 3.5.13
+- Remove `issuer-uri` from Spring Security OAuth2 provider configuration to skip
+  OIDC issuer validation on ID tokens, allowing the token's `iss` claim to differ
+  from the server-to-server Keycloak address
 
-## 24.0.0
-- Upgrades Camunda7 embedded engine to Camunda 7.24 Community
+### Added
+- Introduce `keycloak.url.auth` property for the browser-facing Keycloak URL,
+  enabling split-URL deployments where browsers reach Keycloak at a different
+  address than the application (e.g. Citrix, split-DNS, external Ingress);
+  defaults to `plugin.identity.keycloak.keycloak-issuer-url` so existing
+  single-URL deployments are unaffected
 
-## 23.0.2
-- Started using GitHub Docker registry
+## [24.0.3]
 
-## 23.0.1
-- Enabled SSO
+### Added
+- AWS IAM authentication support via a dedicated `-aws` image variant
 
-## 23.0.0
-- Updates Camunda to 7.23.0 and Spring Boot 3.4.4
-- The first open source version, replacing the private PiA libraries with the open-sourced OpenTMF libraries
+### Removed
+- Bundled OpenTelemetry Java agent from Docker images
 
-## 22.0.6
-- Updated pia-security to 1.0.7
-- Minimized logging in default configuration
-- Refined actuator endpoints related configuration
-- Started requiring security on GET /actuator/env endpoints
-- Specified additional roles to unsanitize GET /actuator/env data
+## [24.0.2]
 
-## 22.0.5
-- Updated pia-security to 1.0.6
-- Changed project tagging format and prepended just "v"
+### Fixed
+- Manual expansion of `JAVA_TOOL_OPTIONS` in the Docker entrypoint
 
-## 22.0.4
-- Updated camunda-incident-logger to 1.0.2
-- Prepended "v7." to the project tagging format
+## [24.0.1]
 
-## 22.0.3
-- Updated pia-security version from 1.0.3 to 1.0.5
-- Updated spring-boot version from 3.3.4 to 3.4.0
-- Fix: default management server base path is now /
-- Changed the project tagging format to just version
+### Changed
+- Upgrade Spring Boot to 3.5.7
+- Upgrade camunda-platform-7-keycloak to 7.24.0
 
-## 22.0.2
-- Updated pia-security version from 1.0.2 to 1.0.3
+### Added
+- Bundle opentelemetry-javaagent.jar in the `/addons` folder of the Docker image
+- Produce semver tags
 
-## 22.0.1
-- Updates to camunda-incident-logger 1.0.1
-- Fix: Removed telemetry-reporter-activate property
-- Decreased default value of historyTimeToLive to 92 days
+## [24.0.0]
 
-## 22.0.0
-- Updates to Camunda 7.22.0
+### Changed
+- Upgrade Camunda7 embedded engine to Camunda 7.24 Community
 
-## 21.0.0
+## [23.0.2]
+
+### Changed
+- Switch to GitHub Docker registry
+
+## [23.0.1]
+
+### Added
+- SSO support
+
+## [23.0.0]
+
+### Changed
+- Update Camunda to 7.23.0 and Spring Boot 3.4.4
+- First open source version, replacing the private PiA libraries with the open-sourced OpenTMF libraries
+
+## [22.0.6]
+
+### Changed
+- Update pia-security to 1.0.7
+- Minimize logging in default configuration
+- Refine actuator endpoints related configuration
+- Require security on GET /actuator/env endpoints
+- Specify additional roles to unsanitize GET /actuator/env data
+
+## [22.0.5]
+
+### Changed
+- Update pia-security to 1.0.6
+- Change project tagging format and prepend just "v"
+
+## [22.0.4]
+
+### Changed
+- Update camunda-incident-logger to 1.0.2
+- Prepend "v7." to the project tagging format
+
+## [22.0.3]
+
+### Changed
+- Update pia-security version from 1.0.3 to 1.0.5
+- Update spring-boot version from 3.3.4 to 3.4.0
+- Change the project tagging format to just version
+
+### Fixed
+- Default management server base path is now /
+
+## [22.0.2]
+
+### Changed
+- Update pia-security version from 1.0.2 to 1.0.3
+
+## [22.0.1]
+
+### Changed
+- Update camunda-incident-logger to 1.0.1
+- Decrease default value of historyTimeToLive to 92 days
+
+### Fixed
+- Remove telemetry-reporter-activate property
+
+## [22.0.0]
+
+### Changed
+- Update to Camunda 7.22.0
+
+## [21.0.0]
+
+### Added
 - Initial version
