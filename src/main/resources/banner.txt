@@ -10,9 +10,10 @@
 
   Application Version     : @project.version@
   Spring-Boot             : ${spring-boot.version}
-  Java                    : ${java.version}
-  Camunda                 : ${camunda.version}
-  Camunda Spin            : ${camunda-spin.version}
-  Camunda Keycloak Plugin : ${camunda-platform-7-keycloak.version}
-  OpenID-RBAC-Security    : ${openid-rbac-security.version}
-  Camunda Incident Logger : ${camunda-incident-logger.version}
+  Java (build JDK)        : @java.version@
+  Java (runtime JVM)      : ${java.runtime.version}
+  Camunda                 : @camunda.version@
+  Camunda Spin            : @camunda-spin.version@
+  Camunda Keycloak Plugin : @camunda-platform-7-keycloak.version@
+  OpenID-RBAC-Security    : @openid-rbac-security.version@
+  Camunda Incident Logger : @camunda-incident-logger.version@

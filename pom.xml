@@ -74,6 +74,7 @@
 
     <!-- Maven plugins -->
     <sonar-plugin.version>5.7.0.6970</sonar-plugin.version>
+    <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
     <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
     <maven-surefire-plugin.version>3.5.6</maven-surefire-plugin.version>
     <maven-failsafe-plugin.version>3.5.6</maven-failsafe-plugin.version>
@@ -233,10 +234,12 @@
 
   <build>
     <!--
-      banner.txt uses Maven resource filtering (@project.version@ and @cibseven.version@)
-      so the banner shows build-time-resolved values. Other resources are NOT filtered to
-      avoid breaking binary content. spring-boot-starter-parent wires this implicitly; we
-      use BOM-only, so the filter is declared here explicitly.
+      banner.txt is Maven-filtered at build time with '@' delimiters only (see the
+      maven-resources-plugin configuration below): @...@ tokens resolve during the build
+      (e.g. @project.version@), while ${...} tokens survive the build and are resolved by
+      Spring's banner rendering at runtime (e.g. ${java.runtime.version}). Other resources
+      are NOT filtered to avoid breaking binary content. spring-boot-starter-parent wires
+      all this implicitly; we use BOM-only, so it is declared here explicitly.
     -->
     <resources>
       <resource>
@@ -264,6 +267,19 @@
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>${maven-resources-plugin.version}</version>
+        <configuration>
+          <!-- '@' only, so ${...} placeholders in banner.txt survive for Spring's
+               runtime banner resolution instead of being consumed by Maven filtering -->
+          <delimiters>
+            <delimiter>@</delimiter>
+          </delimiters>
+          <useDefaultDelimiters>false</useDefaultDelimiters>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
