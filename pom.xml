@@ -86,7 +86,7 @@
     <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
 
     <!-- Sonar properties -->
-    <sonar.coverage.exclusions>**/OpenTmfCamunda7Application.java</sonar.coverage.exclusions>
+    <sonar.coverage.exclusions>**/OpenTmfCamundaApplication.java</sonar.coverage.exclusions>
 
     <!-- AWS-IAM related properties -->
     <aws-msk-iam-auth.version>2.3.5</aws-msk-iam-auth.version>
@@ -515,6 +515,50 @@
                     <argument>.</argument>
                   </arguments>
                 </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!--
+      Local SonarQube scan profile. Talks to a developer-managed local SonarQube
+      (not SonarCloud). Project history accumulates across scans; profile stays
+      small and does not own the SonarQube lifecycle.
+
+      Developer prerequisites (one-time setup):
+        1. Run a SonarQube Community container reachable at http://localhost:9000
+           (image: sonarqube:community).
+        2. In the SonarQube UI, create a project with key
+           org.opentmf.camunda:opentmf-camunda7 and generate an analysis token.
+        3. Export the token as SONAR_TOKEN - the scanner reads it natively.
+
+      Then on each scan:
+        mvn -P sonar clean verify
+
+      Build fails on quality-gate != OK. Do NOT combine with the `docker` profile
+      (which skips tests) - Sonar needs the test run + JaCoCo coverage.
+    -->
+    <profile>
+      <id>sonar</id>
+      <properties>
+        <sonar.host.url>http://localhost:9000</sonar.host.url>
+        <sonar.projectKey>org.opentmf.camunda:opentmf-camunda7</sonar.projectKey>
+        <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.sonarsource.scanner.maven</groupId>
+            <artifactId>sonar-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>sonar-scan</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sonar</goal>
+                </goals>
               </execution>
             </executions>
           </plugin>

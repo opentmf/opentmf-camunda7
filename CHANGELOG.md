@@ -29,6 +29,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Micrometer counters `opentmf.graaljs.contexts.created` and
   `opentmf.graaljs.contexts.closed` for observing GraalJS context lifecycle; in
   steady state their difference is 0
+- Local `sonar` Maven profile for analyzing the project on a developer-managed
+  SonarQube at `http://localhost:9000` (`mvn -P sonar clean verify`)
 
 ## [24.0.5] - 2026-03-31
 
