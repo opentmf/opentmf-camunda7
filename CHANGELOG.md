@@ -14,8 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   instance; a heap dump after ~4,200 instances showed 8,486 retained contexts
   totalling ≈1.2 GiB) and a full GC reclaimed nothing. JavaScript script evaluation
   now goes through a context-closing engine facade that closes the polyglot context
-  as soon as the script invocation completes. Set
-  `opentmf.camunda.script.closing-graaljs: false` to restore the previous behavior.
+  as soon as the script invocation completes.
 
 ### Changed
 - Upgrade Spring Boot to 3.5.16

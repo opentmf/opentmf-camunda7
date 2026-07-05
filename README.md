@@ -19,7 +19,6 @@ BPMN script tasks with `scriptFormat="javascript"` are evaluated by [GraalJS](ht
 - Script results (`camunda:resultVariable`) that are plain JavaScript objects or arrays are copied into plain Java maps/lists before the context closes.
 - Storing a raw JavaScript object **directly** via `execution.setVariable(...)` is discouraged: the value is serialized after the context has closed. Convert it first, e.g. `S(JSON.stringify(obj))` or a Java type.
 - Two Micrometer counters, `opentmf.graaljs.contexts.created` and `opentmf.graaljs.contexts.closed`, expose the context lifecycle; in steady state their difference is 0.
-- Rollback switch: set `OPENTMF_CAMUNDA_SCRIPT_CLOSING_GRAALJS=false` to restore the stock (leaking) engine behavior.
 - Scripts run in GraalJS **interpreter mode** — this is intentional and matches how the image has always behaved. As of GraalVM 25, in-process JIT compilation of JavaScript requires a GraalVM JDK; the image ships Temurin JRE 25 (which matches the Truffle 25.x runtime requirement, keeping startup free of version-mismatch warnings). Short BPMN scripts are unaffected; if you run JS-heavy workloads, consider a GraalVM-based image.
 
 ## Request - Response Logging
@@ -43,7 +42,6 @@ The application is configured through environment variables. The tables below li
 | `SPRING_PROFILES_ACTIVE` | Comma-separated list of active Spring profiles. | — |
 | `LOGGING_CONFIG` | Path to a custom Logback configuration file. | built-in default |
 | `SERVER_FORWARD_HEADERS_STRATEGY` | Strategy for handling forwarded headers (`framework`, `native`, `none`). Set to `framework` when running behind a reverse proxy or Ingress. | `none` |
-| `OPENTMF_CAMUNDA_SCRIPT_CLOSING_GRAALJS` | Close the GraalJS polyglot context after every JavaScript script invocation (leak fix). Set to `false` to restore the stock, leaking engine behavior. | `true` |
 
 ### Database
 
