@@ -18,6 +18,15 @@ camunda.bpm:
     properties:
       historyTimeToLive: P92D
       legacyJobRetryBehaviorEnabled: true
+      # History cleanup - without a batch window the cleanup job is never
+      # scheduled and TTLs are decorative. Times are in the JVM timezone,
+      # which the Docker image pins to UTC. Cleanup jobs are cluster-safe:
+      # they are acquired via the shared database, so multiple pods never
+      # run the same job twice, and degree-of-parallelism is cluster-wide.
+      historyCleanupBatchWindowStartTime: "01:00"
+      historyCleanupBatchWindowEndTime: "05:00"
+      historyCleanupDegreeOfParallelism: 2
+      batchOperationHistoryTimeToLive: P30D
   oauth2:
     sso-logout:
       enabled: true

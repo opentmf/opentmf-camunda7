@@ -48,7 +48,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 public class AuthorizeTokenFilter extends OncePerRequestFilter {
 
-  private static final Logger logger = LoggerFactory.getLogger(AuthorizeTokenFilter.class);
+  private static final Logger log = LoggerFactory.getLogger(AuthorizeTokenFilter.class);
   private final OAuth2AuthorizedClientManager clientManager;
 
   public AuthorizeTokenFilter(OAuth2AuthorizedClientManager clientManager) {
@@ -77,7 +77,8 @@ public class AuthorizeTokenFilter extends OncePerRequestFilter {
     SecurityContextHolder.clearContext();
     try {
       request.getSession().invalidate();
-    } catch (Exception ignored) {
+    } catch (Exception _) {
+      // the session is already invalid or does not exist - nothing left to clean up
     }
   }
 
@@ -97,16 +98,16 @@ public class AuthorizeTokenFilter extends OncePerRequestFilter {
     try {
       var res = clientManager.authorize(authRequest);
       if (res == null || hasTokenExpired(res.getAccessToken())) {
-        logger.warn("Authorize failed for '{}': could not re-authorize expired access token", name);
+        log.warn("Authorize failed for '{}': could not re-authorize expired access token", name);
         clearContext(request);
       } else {
-        logger.debug(
+        log.debug(
             "Authorize successful for '{}', access token expiry: {}",
             name,
             res.getAccessToken().getExpiresAt());
       }
     } catch (OAuth2AuthorizationException e) {
-      logger.warn("Authorize failed for '{}': {}", name, e.getMessage());
+      log.warn("Authorize failed for '{}': {}", name, e.getMessage());
       clearContext(request);
     }
   }

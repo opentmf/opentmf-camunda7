@@ -4,6 +4,48 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [24.0.6] - 2026-07-05
+
+### Fixed
+- Memory leak in JavaScript script tasks: the GraalJS JSR-223 bridge creates a new
+  polyglot context per script evaluation (two per evaluation in practice) and never
+  closes it, while the Truffle engine registry keeps a strong reference to every
+  context ever created. The old generation grew monotonically (~0.36 MiB per process
+  instance; a heap dump after ~4,200 instances showed 8,486 retained contexts
+  totalling ≈1.2 GiB) and a full GC reclaimed nothing. JavaScript script evaluation
+  now goes through a context-closing engine facade that closes the polyglot context
+  as soon as the script invocation completes.
+
+### Changed
+- Upgrade Spring Boot to 3.5.16
+- Upgrade GraalJS to 25.1.3
+- Docker images now run on Eclipse Temurin JRE 25 (Camunda 7.24 and Spring Boot
+  3.5.16 both support Java 25). This matches the GraalJS/Truffle 25.x runtime
+  requirement and removes the version-mismatch warnings at startup. JavaScript
+  script tasks still run interpreted — as of GraalVM 25, in-process JIT of guest
+  code requires a GraalVM JDK — which is the same execution mode as before; the
+  now-intentional interpreter notice is suppressed. Compiled bytecode target
+  remains Java 17
+- Script engines are always resolved through the process engine (resolution through
+  the process application is disabled); equivalent in this single-classloader
+  Spring Boot deployment, and required so that the context-closing facade covers
+  process-application deployments too
+
+### Added
+- Micrometer counters `opentmf.graaljs.contexts.created` and
+  `opentmf.graaljs.contexts.closed` for observing GraalJS context lifecycle; in
+  steady state their difference is 0
+- Local `sonar` Maven profile for analyzing the project on a developer-managed
+  SonarQube at `http://localhost:9000` (`mvn -P sonar clean verify`)
+- Nightly history cleanup: a 01:00–05:00 UTC batch window (previously no window
+  was configured, so the cleanup job was never scheduled and `historyTimeToLive`
+  was decorative), `historyCleanupDegreeOfParallelism: 2`, and a `P30D` TTL for
+  batch-operation history. Note: instances that ended before `historyTimeToLive`
+  was in effect have no removal time and need a one-time
+  `POST /history/process-instance/set-removal-time` (also available as a Cockpit
+  batch operation) to be picked up by cleanup
+- `banner.txt` to list detailed versions at startup.
+
 ## [24.0.5] - 2026-03-31
 
 ### Fixed

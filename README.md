@@ -12,6 +12,15 @@ With the help of the public [Spin](https://docs.camunda.org/manual/latest/refere
 ## Incident Logging
 OpenTMF's [Camunda7 Incident Logger](https://github.com/opentmf/camunda7-incident-logger) is used to write a log statement when a failed task has zero retry counts.
 
+## JavaScript Script Tasks (GraalJS)
+BPMN script tasks with `scriptFormat="javascript"` are evaluated by [GraalJS](https://github.com/oracle/graaljs), since Nashorn was removed from the JDK. The stock GraalJS JSR-223 bridge leaks one polyglot context per evaluation (nothing ever calls `Context.close()`, and the Truffle engine registry pins every context forever), which grows the old generation unboundedly under script-task load. This application therefore routes JavaScript evaluation through a context-closing engine facade that closes each polyglot context as soon as the script invocation (environment scripts plus user script) completes.
+
+- Spin helpers such as `S(...)` keep working: the context stays open across the environment scripts and the user script of one invocation.
+- Script results (`camunda:resultVariable`) that are plain JavaScript objects or arrays are copied into plain Java maps/lists before the context closes.
+- Storing a raw JavaScript object **directly** via `execution.setVariable(...)` is discouraged: the value is serialized after the context has closed. Convert it first, e.g. `S(JSON.stringify(obj))` or a Java type.
+- Two Micrometer counters, `opentmf.graaljs.contexts.created` and `opentmf.graaljs.contexts.closed`, expose the context lifecycle; in steady state their difference is 0.
+- Scripts run in GraalJS **interpreter mode** — this is intentional and matches how the image has always behaved. As of GraalVM 25, in-process JIT compilation of JavaScript requires a GraalVM JDK; the image ships Temurin JRE 25 (which matches the Truffle 25.x runtime requirement, keeping startup free of version-mismatch warnings). Short BPMN scripts are unaffected; if you run JS-heavy workloads, consider a GraalVM-based image.
+
 ## Request - Response Logging
 In order to enable request - response logging, set the following logging level to DEBUG. To cancel, set to INFO.
 
@@ -54,6 +63,22 @@ The application is configured through environment variables. The tables below li
 | `KEYCLOAK_URL_AUTH` | Browser-facing Keycloak realm URL. Used for the OAuth2 authorization redirect and the CSP `connect-src` header. Defaults to `PLUGIN_IDENTITY_KEYCLOAK_KEYCLOAK_ISSUER_URL`, so in standard deployments only the issuer URL needs to be set. Override this when browsers reach Keycloak at a different address than the application (e.g. Citrix, split-DNS, external Ingress). | same as `PLUGIN_IDENTITY_KEYCLOAK_KEYCLOAK_ISSUER_URL` |
 | `OPENTMF_SECURITY_USER_CLAIM` | JWT claim used as the authenticated user's identity (e.g. `email`, `preferred_username`, `sub`). | `email` |
 | `OPENTMF_SECURITY_AUTHORITIES_CLAIM` | JWT claim that carries the user's role/group list. | `groups` |
+
+### History Cleanup
+
+The image ships with nightly history cleanup enabled: a 01:00–05:00 UTC batch window, cleanup parallelism of 2, a global `historyTimeToLive` of `P92D` (individual BPMNs override it via `camunda:historyTimeToLive`), and a `P30D` TTL for batch-operation history. Cleanup is cluster-safe — jobs are acquired through the shared database, so multiple pods never run the same job twice.
+
+To change the window, **do not use `CAMUNDA_BPM_...` environment variables**: Spring's relaxed binding does not reliably map environment-variable names onto the camelCase map keys under `generic-properties.properties`. Instead, mount an override file (see `SPRING_CONFIG_ADDITIONAL_LOCATION` above) containing, e.g.:
+
+```yaml
+camunda.bpm:
+  generic-properties:
+    properties:
+      historyCleanupBatchWindowStartTime: "22:00"
+      historyCleanupBatchWindowEndTime: "06:00"
+```
+
+A `"00:00"`–`"00:00"` window means continuous cleanup; per-weekday windows are available via `sundayHistoryCleanupBatchWindowStartTime` and friends. Instances that ended before a TTL was in effect carry no removal time and are never cleaned — run `POST /history/process-instance/set-removal-time` once (or the equivalent Cockpit batch operation) to backfill. Verify the schedule with `GET /history/cleanup/job`, or trigger an immediate run with `POST /history/cleanup`.
 
 ### Split-URL deployments
 
