@@ -66,6 +66,22 @@ The application is configured through environment variables. The tables below li
 | `OPENTMF_SECURITY_USER_CLAIM` | JWT claim used as the authenticated user's identity (e.g. `email`, `preferred_username`, `sub`). | `email` |
 | `OPENTMF_SECURITY_AUTHORITIES_CLAIM` | JWT claim that carries the user's role/group list. | `groups` |
 
+### History Cleanup
+
+The image ships with nightly history cleanup enabled: a 01:00–05:00 UTC batch window, cleanup parallelism of 2, a global `historyTimeToLive` of `P92D` (individual BPMNs override it via `camunda:historyTimeToLive`), and a `P30D` TTL for batch-operation history. Cleanup is cluster-safe — jobs are acquired through the shared database, so multiple pods never run the same job twice.
+
+To change the window, **do not use `CAMUNDA_BPM_...` environment variables**: Spring's relaxed binding does not reliably map environment-variable names onto the camelCase map keys under `generic-properties.properties`. Instead, mount an override file (see `SPRING_CONFIG_ADDITIONAL_LOCATION` above) containing, e.g.:
+
+```yaml
+camunda.bpm:
+  generic-properties:
+    properties:
+      historyCleanupBatchWindowStartTime: "22:00"
+      historyCleanupBatchWindowEndTime: "06:00"
+```
+
+A `"00:00"`–`"00:00"` window means continuous cleanup; per-weekday windows are available via `sundayHistoryCleanupBatchWindowStartTime` and friends. Instances that ended before a TTL was in effect carry no removal time and are never cleaned — run `POST /history/process-instance/set-removal-time` once (or the equivalent Cockpit batch operation) to backfill. Verify the schedule with `GET /history/cleanup/job`, or trigger an immediate run with `POST /history/cleanup`.
+
 ### Split-URL deployments
 
 In environments where the browser-facing Keycloak address differs from the address reachable by the application (e.g. when accessing through Citrix or a corporate proxy), set both variables independently:

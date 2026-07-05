@@ -38,6 +38,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   steady state their difference is 0
 - Local `sonar` Maven profile for analyzing the project on a developer-managed
   SonarQube at `http://localhost:9000` (`mvn -P sonar clean verify`)
+- Nightly history cleanup: a 01:00–05:00 UTC batch window (previously no window
+  was configured, so the cleanup job was never scheduled and `historyTimeToLive`
+  was decorative), `historyCleanupDegreeOfParallelism: 2`, and a `P30D` TTL for
+  batch-operation history. Note: instances that ended before `historyTimeToLive`
+  was in effect have no removal time and need a one-time
+  `POST /history/process-instance/set-removal-time` (also available as a Cockpit
+  batch operation) to be picked up by cleanup
 
 ## [24.0.5] - 2026-03-31
 
