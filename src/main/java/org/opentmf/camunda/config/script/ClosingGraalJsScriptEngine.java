@@ -249,7 +249,7 @@ public class ClosingGraalJsScriptEngine extends AbstractScriptEngine
   private static Object copyToJava(Object value) {
     if (isPolyglotProxy(value)) {
       if (value instanceof Map<?, ?> map) {
-        Map<Object, Object> copy = new LinkedHashMap<>(map.size());
+        Map<Object, Object> copy = LinkedHashMap.newLinkedHashMap(map.size());
         map.forEach((key, entry) -> copy.put(copyToJava(key), copyToJava(entry)));
         return copy;
       }

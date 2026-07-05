@@ -77,7 +77,7 @@ public class AuthorizeTokenFilter extends OncePerRequestFilter {
     SecurityContextHolder.clearContext();
     try {
       request.getSession().invalidate();
-    } catch (Exception ignored) {
+    } catch (Exception _) {
       // the session is already invalid or does not exist - nothing left to clean up
     }
   }

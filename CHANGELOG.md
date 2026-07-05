@@ -45,6 +45,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   was in effect have no removal time and need a one-time
   `POST /history/process-instance/set-removal-time` (also available as a Cockpit
   batch operation) to be picked up by cleanup
+- `banner.txt` to list detailed versions at startup.
 
 ## [24.0.5] - 2026-03-31
 

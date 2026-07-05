@@ -55,6 +55,10 @@ class ScriptEnginePluginTest {
                 input + 1;
                 """)
             .camundaResultVariable("result")
+            .scriptTask("juelTask")
+            .scriptFormat("juel")
+            .scriptText("${input + 2}")
+            .camundaResultVariable("juelResult")
             .endEvent()
             .done();
     processEngine
@@ -86,6 +90,7 @@ class ScriptEnginePluginTest {
       if (i % 100 == 0 || i == INSTANCE_COUNT - 1) {
         assertEquals(i + 1, ((Number) historicVariable(instance.getId(), "result")).intValue());
         assertEquals(40 + i, ((Number) historicVariable(instance.getId(), "fromSpin")).intValue());
+        assertEquals(i + 2, ((Number) historicVariable(instance.getId(), "juelResult")).intValue());
       }
     }
 

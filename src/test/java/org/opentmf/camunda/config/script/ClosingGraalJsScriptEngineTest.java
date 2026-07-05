@@ -7,6 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 import javax.script.Bindings;
@@ -109,6 +112,75 @@ class ClosingGraalJsScriptEngineTest {
   void syntaxErrorSurfacesAtCompileTime() {
     assertThrows(ScriptException.class, () -> engine.compile("function ("));
     assertCountersBalanced();
+  }
+
+  @Test
+  void readerBasedEvalAndCompileWork() throws ScriptException {
+    assertEquals(7, ((Number) engine.eval(new StringReader("3 + 4"))).intValue());
+
+    CompiledScript compiled = engine.compile(new StringReader("a * 2"));
+    Bindings bindings = engine.createBindings();
+    bindings.put("a", 21);
+    assertEquals(42, ((Number) compiled.eval(bindings)).intValue());
+    assertCountersBalanced();
+  }
+
+  @Test
+  void failingReaderSurfacesAsScriptException() {
+    Reader failing =
+        new Reader() {
+          @Override
+          public int read(char[] buffer, int offset, int length) throws IOException {
+            throw new IOException("boom");
+          }
+
+          @Override
+          public void close() {
+            // nothing to release
+          }
+        };
+    assertThrows(ScriptException.class, () -> engine.eval(failing));
+  }
+
+  @Test
+  void nestedInvocationScopesCloseTheirOwnContexts() throws ScriptException {
+    Bindings outer = engine.createBindings();
+    Bindings inner = engine.createBindings();
+    engine.beginInvocation();
+    try {
+      engine.eval("var marker = 'outer';", outer);
+      engine.beginInvocation();
+      try {
+        assertEquals(2, ((Number) engine.eval("1 + 1", inner)).intValue());
+      } finally {
+        engine.endInvocation(inner);
+      }
+      // outer context survived the nested invocation
+      assertEquals("outer", engine.eval("marker", outer));
+    } finally {
+      engine.endInvocation(outer);
+    }
+    assertCountersBalanced();
+  }
+
+  @Test
+  void closableBindingsOfTheStockEngineAreNeverProbed() {
+    try (GraalJSScriptEngine stock = GraalJSScriptEngine.create()) {
+      Bindings graalBindings = stock.createBindings();
+      engine.beginInvocation();
+      // GraalJSBindings allocate a context when read; endInvocation must not touch them
+      engine.endInvocation(graalBindings);
+      assertCountersBalanced();
+    }
+  }
+
+  @Test
+  void externalResourceAndNashornCompatibilityFlagsAreApplied() throws ScriptException {
+    SimpleMeterRegistry registry = new SimpleMeterRegistry();
+    try (ClosingGraalJsScriptEngine permissiveEngine =
+        new ClosingGraalJsScriptEngine(true, true, true, registry)) {
+      assertEquals(3, ((Number) permissiveEngine.eval("1 + 2")).intValue());
+    }
   }
 
   @Test

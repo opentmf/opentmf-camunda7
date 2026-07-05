@@ -53,7 +53,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <java.version>17</java.version>
+    <java.version>25</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
 
@@ -157,7 +157,6 @@
       <type>pom</type>
       <scope>runtime</scope>
     </dependency>
-
     <!-- OpenTMF OpenID Security -->
     <dependency>
       <groupId>org.opentmf.security</groupId>
@@ -233,6 +232,28 @@
   </dependencies>
 
   <build>
+    <!--
+      banner.txt uses Maven resource filtering (@project.version@ and @cibseven.version@)
+      so the banner shows build-time-resolved values. Other resources are NOT filtered to
+      avoid breaking binary content. spring-boot-starter-parent wires this implicitly; we
+      use BOM-only, so the filter is declared here explicitly.
+    -->
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <include>banner.txt</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>banner.txt</exclude>
+        </excludes>
+      </resource>
+    </resources>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -256,7 +277,7 @@
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <version>17</version>
+                  <version>25</version>
                 </requireJavaVersion>
                 <requireMavenVersion>
                   <version>3.9.0</version>
@@ -345,17 +366,17 @@
                   <limits>
                     <limit>
                       <counter>LINE</counter>
-                      <minimum>50%</minimum>
+                      <minimum>80%</minimum>
                       <value>COVEREDRATIO</value>
                     </limit>
                     <limit>
                       <counter>INSTRUCTION</counter>
-                      <minimum>50%</minimum>
+                      <minimum>80%</minimum>
                       <value>COVEREDRATIO</value>
                     </limit>
                     <limit>
                       <counter>BRANCH</counter>
-                      <minimum>50%</minimum>
+                      <minimum>80%</minimum>
                       <value>COVEREDRATIO</value>
                     </limit>
                     <limit>
