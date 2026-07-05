@@ -12,6 +12,15 @@ With the help of the public [Spin](https://docs.camunda.org/manual/latest/refere
 ## Incident Logging
 OpenTMF's [Camunda7 Incident Logger](https://github.com/opentmf/camunda7-incident-logger) is used to write a log statement when a failed task has zero retry counts.
 
+## JavaScript Script Tasks (GraalJS)
+BPMN script tasks with `scriptFormat="javascript"` are evaluated by [GraalJS](https://github.com/oracle/graaljs), since Nashorn was removed from the JDK. The stock GraalJS JSR-223 bridge leaks one polyglot context per evaluation (nothing ever calls `Context.close()`, and the Truffle engine registry pins every context forever), which grows the old generation unboundedly under script-task load. This application therefore routes JavaScript evaluation through a context-closing engine facade that closes each polyglot context as soon as the script invocation (environment scripts plus user script) completes.
+
+- Spin helpers such as `S(...)` keep working: the context stays open across the environment scripts and the user script of one invocation.
+- Script results (`camunda:resultVariable`) that are plain JavaScript objects or arrays are copied into plain Java maps/lists before the context closes.
+- Storing a raw JavaScript object **directly** via `execution.setVariable(...)` is discouraged: the value is serialized after the context has closed. Convert it first, e.g. `S(JSON.stringify(obj))` or a Java type.
+- Two Micrometer counters, `opentmf.graaljs.contexts.created` and `opentmf.graaljs.contexts.closed`, expose the context lifecycle; in steady state their difference is 0.
+- Rollback switch: set `OPENTMF_CAMUNDA_SCRIPT_CLOSING_GRAALJS=false` to restore the stock (leaking) engine behavior.
+
 ## Request - Response Logging
 In order to enable request - response logging, set the following logging level to DEBUG. To cancel, set to INFO.
 
@@ -33,6 +42,7 @@ The application is configured through environment variables. The tables below li
 | `SPRING_PROFILES_ACTIVE` | Comma-separated list of active Spring profiles. | — |
 | `LOGGING_CONFIG` | Path to a custom Logback configuration file. | built-in default |
 | `SERVER_FORWARD_HEADERS_STRATEGY` | Strategy for handling forwarded headers (`framework`, `native`, `none`). Set to `framework` when running behind a reverse proxy or Ingress. | `none` |
+| `OPENTMF_CAMUNDA_SCRIPT_CLOSING_GRAALJS` | Close the GraalJS polyglot context after every JavaScript script invocation (leak fix). Set to `false` to restore the stock, leaking engine behavior. | `true` |
 
 ### Database
 

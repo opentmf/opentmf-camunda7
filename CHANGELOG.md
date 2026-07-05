@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [24.0.6] - 2026-07-05
+
+### Fixed
+- Memory leak in JavaScript script tasks: the GraalJS JSR-223 bridge creates a new
+  polyglot context per script evaluation (two per evaluation in practice) and never
+  closes it, while the Truffle engine registry keeps a strong reference to every
+  context ever created. The old generation grew monotonically (~0.36 MiB per process
+  instance; a heap dump after ~4,200 instances showed 8,486 retained contexts
+  totalling ≈1.2 GiB) and a full GC reclaimed nothing. JavaScript script evaluation
+  now goes through a context-closing engine facade that closes the polyglot context
+  as soon as the script invocation completes. Set
+  `opentmf.camunda.script.closing-graaljs: false` to restore the previous behavior.
+
+### Changed
+- Upgrade Spring Boot to 3.5.16
+- Upgrade GraalJS to 25.1.3
+- Script engines are always resolved through the process engine (resolution through
+  the process application is disabled); equivalent in this single-classloader
+  Spring Boot deployment, and required so that the context-closing facade covers
+  process-application deployments too
+
+### Added
+- Micrometer counters `opentmf.graaljs.contexts.created` and
+  `opentmf.graaljs.contexts.closed` for observing GraalJS context lifecycle; in
+  steady state their difference is 0
+
 ## [24.0.5] - 2026-03-31
 
 ### Fixed
