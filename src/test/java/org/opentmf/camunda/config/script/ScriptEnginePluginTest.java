@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 import org.camunda.bpm.engine.ProcessEngine;
@@ -114,13 +115,10 @@ class ScriptEnginePluginTest {
   }
 
   private static long usedMemoryAfterGc() {
-    for (int i = 0; i < 3; i++) {
+    // a cleared WeakReference proves a full collection cycle ran, without sleeping
+    WeakReference<Object> collected = new WeakReference<>(new Object());
+    while (collected.get() != null) {
       System.gc();
-      try {
-        Thread.sleep(50);
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-      }
     }
     Runtime runtime = Runtime.getRuntime();
     return runtime.totalMemory() - runtime.freeMemory();

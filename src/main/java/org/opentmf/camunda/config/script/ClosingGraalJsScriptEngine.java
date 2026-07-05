@@ -79,7 +79,11 @@ public class ClosingGraalJsScriptEngine extends AbstractScriptEngine
             // runtime ever supports it, the JIT engages regardless of this warning option.
             .option("engine.WarnInterpreterOnly", "false")
             .build();
-    this.factory = GraalJSScriptEngine.create(sharedEngine, null).getFactory();
+    // createDelegate, not a bare create: closing materializes a default context on the shared
+    // engine, and all contexts of a shared engine must use the same host access configuration
+    try (GraalJSScriptEngine template = createDelegate()) {
+      this.factory = template.getFactory();
+    }
     this.contextsCreated =
         Counter.builder(CONTEXTS_CREATED_METRIC)
             .description("GraalJS polyglot contexts created for script evaluations")
@@ -92,6 +96,9 @@ public class ClosingGraalJsScriptEngine extends AbstractScriptEngine
 
   @Override
   public Object eval(String script, ScriptContext scriptContext) throws ScriptException {
+    // the delegate is deliberately not closed: that would allocate (only to close) a default
+    // context this engine never uses; the context of this evaluation lives in the ScriptContext
+    // bindings and is closed by evalAndManageContext/endInvocation
     GraalJSScriptEngine delegate = createDelegate();
     return evalAndManageContext(() -> delegate.eval(script, scriptContext), scriptContext);
   }
@@ -104,8 +111,8 @@ public class ClosingGraalJsScriptEngine extends AbstractScriptEngine
   @Override
   public CompiledScript compile(String script) throws ScriptException {
     checkSyntax(script);
-    // Camunda caches this per process definition. The source string is all that is retained;
-    // compiled-code reuse across evaluations happens in the shared engine's source cache.
+    // Camunda caches this object per process definition, but only the source string is retained
+    // here - compiled-code reuse across evaluations happens in the shared engine's source cache
     return new CompiledScript() {
       @Override
       public Object eval(ScriptContext scriptContext) throws ScriptException {
@@ -214,8 +221,8 @@ public class ClosingGraalJsScriptEngine extends AbstractScriptEngine
   }
 
   private Context findPolyglotContext(Bindings bindings) {
-    // GraalJSBindings (the only AutoCloseable Bindings in play) allocate a context on get();
-    // never probe them — their owner is responsible for closing.
+    // GraalJSBindings, the only AutoCloseable Bindings in play, allocate a context when read -
+    // never probe them, their owner is responsible for closing
     if (bindings == null || bindings instanceof AutoCloseable) {
       return null;
     }

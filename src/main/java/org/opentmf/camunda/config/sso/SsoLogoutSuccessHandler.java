@@ -33,7 +33,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
  */
 public class SsoLogoutSuccessHandler extends OidcClientInitiatedLogoutSuccessHandler {
 
-  private static final Logger logger = LoggerFactory.getLogger(SsoLogoutSuccessHandler.class);
+  private static final Logger log = LoggerFactory.getLogger(SsoLogoutSuccessHandler.class);
 
   public SsoLogoutSuccessHandler(
       ClientRegistrationRepository clientRegistrationRepository,
@@ -46,7 +46,7 @@ public class SsoLogoutSuccessHandler extends OidcClientInitiatedLogoutSuccessHan
   public void onLogoutSuccess(
       HttpServletRequest request, HttpServletResponse response, Authentication authentication)
       throws IOException, ServletException {
-    logger.debug("Initiating SSO logout for '{}'", authentication.getName());
+    log.debug("Initiating SSO logout for '{}'", authentication.getName());
     super.onLogoutSuccess(request, response, authentication);
   }
 }

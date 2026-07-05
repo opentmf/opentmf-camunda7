@@ -36,7 +36,6 @@ class OpenTmfCamundaApplicationIT {
     // Resource Server (JWT) and/or client config – adapt to your app:
     r.add("plugin.identity.keycloak.keycloak-issuer-url", () -> issuer);
     r.add("plugin.identity.keycloak.keycloak-admin-url", () -> admin);
-    // r.add("opentmf.security.jwk-set-uri", () -> issuer + "/protocol/openid-connect/certs");
   }
 
   @Autowired
