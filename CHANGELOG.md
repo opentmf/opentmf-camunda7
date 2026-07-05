@@ -20,6 +20,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 - Upgrade Spring Boot to 3.5.16
 - Upgrade GraalJS to 25.1.3
+- Docker images now run on Eclipse Temurin JRE 25 (Camunda 7.24 and Spring Boot
+  3.5.16 both support Java 25). This matches the GraalJS/Truffle 25.x runtime
+  requirement and removes the version-mismatch warnings at startup. JavaScript
+  script tasks still run interpreted — as of GraalVM 25, in-process JIT of guest
+  code requires a GraalVM JDK — which is the same execution mode as before; the
+  now-intentional interpreter notice is suppressed. Compiled bytecode target
+  remains Java 17
 - Script engines are always resolved through the process engine (resolution through
   the process application is disabled); equivalent in this single-classloader
   Spring Boot deployment, and required so that the context-closing facade covers

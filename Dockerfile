@@ -1,12 +1,14 @@
 # the lightweight alpine does not support arm64
-# hence another lightweight distro jammy for broader coverage
-FROM eclipse-temurin:17-jre-jammy AS builder
+# hence another lightweight distro noble for broader coverage
+# JRE 25 matches the GraalJS/Truffle 25.x runtime requirement. JS script tasks still run
+# interpreted: as of GraalVM 25, in-process JIT of guest code requires a GraalVM JDK.
+FROM eclipse-temurin:25-jre-noble AS builder
 WORKDIR /application
 ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE} application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
 
-FROM eclipse-temurin:17-jre-jammy
+FROM eclipse-temurin:25-jre-noble
 RUN apt-get update && \
     apt-get install -y curl jq iputils-ping procps rsync && \
     rm -rf /var/lib/apt/lists/* && \

@@ -1,5 +1,5 @@
-# Stage 1: Build the JAR using Maven
-FROM maven:3.9.9-eclipse-temurin-17 AS maven-build
+# Stage 1: Build the JAR using Maven (bytecode target stays 17 via maven.compiler.*)
+FROM maven:3.9.12-eclipse-temurin-25 AS maven-build
 WORKDIR /build
 ARG MAVEN_PROFILES=repackage
 COPY pom.xml .
@@ -7,13 +7,15 @@ COPY src ./src
 RUN mvn -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dmaven.source.skip=true -P ${MAVEN_PROFILES} clean package
 
 # Stage 2: Extract layers using layertools
-FROM eclipse-temurin:17-jre-jammy AS layer-extract
+FROM eclipse-temurin:25-jre-noble AS layer-extract
 WORKDIR /application
 COPY --from=maven-build /build/target/*.jar application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
 
 # Stage 3: Final runtime image
-FROM eclipse-temurin:17-jre-jammy
+# JRE 25 matches the GraalJS/Truffle 25.x runtime requirement. JS script tasks still run
+# interpreted: as of GraalVM 25, in-process JIT of guest code requires a GraalVM JDK.
+FROM eclipse-temurin:25-jre-noble
 RUN apt-get update && \
     apt-get install -y curl iputils-ping procps rsync && \
     rm -rf /var/lib/apt/lists/* && \

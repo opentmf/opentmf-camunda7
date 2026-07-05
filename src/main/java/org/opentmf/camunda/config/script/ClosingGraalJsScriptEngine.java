@@ -71,7 +71,14 @@ public class ClosingGraalJsScriptEngine extends AbstractScriptEngine
     this.configureHostAccess = configureHostAccess;
     this.allowLoadExternalResources = allowLoadExternalResources;
     this.nashornCompatibility = nashornCompatibility;
-    this.sharedEngine = Engine.newBuilder().allowExperimentalOptions(true).build();
+    this.sharedEngine =
+        Engine.newBuilder()
+            .allowExperimentalOptions(true)
+            // Interpreter-only execution is intentional: as of GraalVM 25, in-process JIT of
+            // guest code requires a GraalVM JDK, which this deployment does not ship. If the
+            // runtime ever supports it, the JIT engages regardless of this warning option.
+            .option("engine.WarnInterpreterOnly", "false")
+            .build();
     this.factory = GraalJSScriptEngine.create(sharedEngine, null).getFactory();
     this.contextsCreated =
         Counter.builder(CONTEXTS_CREATED_METRIC)
